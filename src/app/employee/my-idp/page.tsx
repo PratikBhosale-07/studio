@@ -1,26 +1,28 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
-import { FirebaseClientProvider, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { FirebaseClientProvider, useUser, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { Plus, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, Menu, Milestone, ChevronRight, Calendar, User } from 'lucide-react';
+import { Plus, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, Menu, Milestone, ChevronRight, Calendar, User, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CreateIdpDialog } from '@/components/idp/create-idp-dialog';
-import { collection, query, where, getFirestore } from 'firebase/firestore';
+import { collection, query, where, getFirestore, doc } from 'firebase/firestore';
 import type { IndividualDevelopmentPlan } from '@/types/idp';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
+import { useToast } from '@/hooks/use-toast';
 
 function MyIdpContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const auth = getAuth();
+  const { toast } = useToast();
 
   const firestore = getFirestore();
 
@@ -39,6 +41,25 @@ function MyIdpContent() {
     await signOut(auth);
     router.push('/login');
   };
+
+  const handleDeleteIdp = async (idpId: string) => {
+    if (!firestore) return;
+    const docRef = doc(firestore, 'individual_development_plans', idpId);
+    try {
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: 'IDP Removed',
+            description: 'The Individual Development Plan has been successfully removed.',
+        });
+    } catch (error) {
+        console.error("Error removing document: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'There was a problem removing the IDP.',
+        });
+    }
+  }
 
   const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
@@ -152,7 +173,12 @@ function MyIdpContent() {
                     <CardHeader>
                       <CardTitle className='flex justify-between items-center'>
                         {item.title}
-                        <Badge variant={item.status === 'Completed' ? 'secondary' : 'default'}>{item.status}</Badge>
+                        <div className="flex items-center gap-2">
+                           <Badge variant={item.status === 'Completed' ? 'secondary' : 'default'}>{item.status}</Badge>
+                           <Button variant="ghost" size="icon" onClick={() => handleDeleteIdp(item.id)}>
+                              <Trash2 className="h-5 w-5 text-destructive" />
+                           </Button>
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="grid gap-4">
