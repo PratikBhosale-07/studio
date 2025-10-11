@@ -1,0 +1,47 @@
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FirebaseClientProvider, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+
+function EmployeeDashboardContent() {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  if (isUserLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
+
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <div className="flex flex-col sm:gap-4 sm:py-4">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <h1 className="text-xl font-semibold">Employee Dashboard</h1>
+        </header>
+        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Welcome, {user.displayName || user.email}!</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>This is your personal dashboard. Here you can view your development plan, track your progress, and more.</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default function EmployeeDashboard() {
+    return (
+        <FirebaseClientProvider>
+            <EmployeeDashboardContent />
+        </FirebaseClientProvider>
+    )
+}

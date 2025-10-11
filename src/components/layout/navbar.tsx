@@ -1,12 +1,13 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Menu, Mountain } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
+import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { getAuth, signOut } from 'firebase/auth';
 
 const navLinks = [
   { href: '#home', label: 'Home' },
@@ -18,11 +19,19 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const auth = getAuth();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
-        <Link href="#home" className="mr-6 flex items-center space-x-2">
+        <Link href="/" className="mr-6 flex items-center space-x-2">
           <Mountain className="h-6 w-6 text-primary" />
           <span className="font-bold">TalentFlow AI</span>
         </Link>
@@ -38,8 +47,19 @@ export default function Navbar() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Button variant="ghost">Log In</Button>
-          <Button>Get Started</Button>
+          {!isUserLoading &&
+            (user ? (
+              <Button onClick={handleLogout} variant="ghost">Log Out</Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost">
+                  <Link href="/login">Log In</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            ))}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -50,7 +70,7 @@ export default function Navbar() {
             <SheetContent side="left">
               <nav className="grid gap-6 text-lg font-medium">
                 <Link
-                  href="#home"
+                  href="/"
                   className="flex items-center gap-2 text-lg font-semibold"
                   onClick={() => setIsOpen(false)}
                 >
