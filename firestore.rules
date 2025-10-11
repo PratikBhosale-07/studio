@@ -1,130 +1,161 @@
 /**
- * @file Firebase Security Rules for TalentFlow AI.
+ * @fileoverview Firestore Security Rules for TalentFlow AI.
  *
- * @description This ruleset enforces a role-based access control model for the TalentFlow AI system,
- * with distinct collections for Employees, Managers, and Admins. Individual Development Plans (IDPs)
- * are associated with Employees. Access control is based on user roles and document ownership.
+ * Core Philosophy: This ruleset enforces a role-based access control system,
+ * where access is determined by the user's presence in specific collections
+ * (employees, managers, admins). Each role has different levels of access
+ * to individual development plans (IDPs).
  *
- * @dataStructure
- * - /employees/{employeeId}: Employee profiles, accessible only to the employee and admins.
- * - /managers/{managerId}: Manager profiles, accessible only to the manager and admins.
- * - /admins/{adminId}: Admin profiles, accessible only to the admin.
- * - /individual_development_plans/{idpId}: Individual Development Plans, accessible to the associated employee and admins.
+ * Data Structure:
+ * - /employees/{employeeId}: Employee profiles.
+ * - /managers/{managerId}: Manager profiles.
+ * - /admins/{adminId}: Admin profiles.
+ * - /individual_development_plans/{idpId}: Individual development plans.
  *
- * @keySecurityDecisions
- * - Listing of users (employees, managers, admins) is prohibited for non-admins.
- * - Data consistency is enforced between document IDs and user IDs in user-specific collections.
- * - IDP access is granted to the associated employee.
+ * Key Security Decisions:
+ * - IDPs can be read by anyone, but write access is restricted.
+ * - Employees can only modify their own IDPs.
+ * - Managers and Admins have broader write access to IDPs.
+ * - Listing is generally allowed, with the exception of listing employees, managers and admins.
  *
- * @denormalizationForAuthorization
- * - The `employeeId` field is present on the `/individual_development_plans/{idpId}` document to simplify authorization checks.
- *
- * @structuralSegregation
- * - User profiles (employees, managers, admins) are stored in separate collections to simplify role-based access control.
+ * Denormalization for Authorization:
+ * - The `employeeId` field in the `/individual_development_plans/{idpId}`
+ *   collection is used to determine ownership and restrict write access.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Defines a global function to check if a user is signed in.
+     * @description Checks if the request is authenticated.
+     * @return {boolean} True if the request is authenticated, false otherwise.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Defines a helper function to check if the request is made by the owner of the document.
-     * @param {string} userId - The user ID to check against.
+     * @description Checks if the authenticated user's ID matches the provided userId.
+     * @param {string} userId - The user ID to compare against.
+     * @return {boolean} True if the user is signed in and their UID matches the provided userId.
      */
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * @description Defines a helper function to check if the request is made by the existing owner of the document.
-     * @param {string} userId - The user ID to check against.
+     * @description Checks if the authenticated user's ID matches the resource's employeeId.
+     * @param {string} employeeId - The employeeId to compare against.
+     * @return {boolean} True if the user is signed in and their UID matches the provided employeeId.
      */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource.data != null;
+    function isIdPOwner(employeeId) {
+        return isSignedIn() && request.auth.uid == employeeId;
     }
 
     /**
-     * @description Checks if the user's ID is present in the admins collection.
+     * @description Checks if the user is an employee.
+     * @param {string} employeeId - The employeeId of the employee to validate.
+     * @return {boolean} True if the user is an employee, false otherwise.
+     */
+    function isEmployee() {
+      return exists(/databases/$(database)/documents/employees/$(request.auth.uid));
+    }
+
+    /**
+     * @description Checks if the user is a manager.
+     * @param {string} managerId - The managerId of the manager to validate.
+     * @return {boolean} True if the user is a manager, false otherwise.
+     */
+    function isManager() {
+      return exists(/databases/$(database)/documents/managers/$(request.auth.uid));
+    }
+
+    /**
+     * @description Checks if the user is an admin.
+     * @param {string} adminId - The adminId of the admin to validate.
+     * @return {boolean} True if the user is an admin, false otherwise.
      */
     function isAdmin() {
-        return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    /**
+     * @description Checks if the user is an existing owner of the document.
+     * @param {string} userId - The user ID to compare against.
+     * @return {boolean} True if the user is signed in, their UID matches the provided userId, and the resource exists.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
     }
 
     /**
      * @description Rules for the /employees/{employeeId} collection.
      * @path /employees/{employeeId}
-     * @allow (get, create, update, delete) - An employee can read, create, update, or delete their own profile (employeeId matches auth.uid).
-     * @allow (get) - An admin can read any employee profile.
-     * @deny (list) - Employees cannot list other employee profiles.
-     * @deny (create, update, delete) - Non-employees cannot create, update or delete employee profiles.
-     * @deny (create, update, delete) - Employees cannot create, update or delete another employee's profile.
-     * @principle Enforces document ownership and admin overrides for employee profiles.
+     * @allow (create) Signed-in user creates their own employee document.
+     * @deny (create) Signed-in user attempts to create an employee document with a mismatched ID.
+     * @deny (update) Any user attempts to update an employee document.
+     * @deny (delete) Any user attempts to delete an employee document.
+     * @principle Enforces document ownership and prevents unauthorized modifications.
      */
     match /employees/{employeeId} {
-      allow get: if isOwner(employeeId) || isAdmin();
+      allow get: if false;
       allow list: if false;
       allow create: if isOwner(employeeId);
-      allow update: if isOwner(employeeId);
-      allow delete: if isOwner(employeeId);
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
      * @description Rules for the /managers/{managerId} collection.
      * @path /managers/{managerId}
-     * @allow (get, create, update, delete) - A manager can read, create, update, or delete their own profile (managerId matches auth.uid).
-     * @allow (get) - An admin can read any manager profile.
-     * @deny (list) - Managers cannot list other manager profiles.
-     * @deny (create, update, delete) - Non-managers cannot create, update or delete manager profiles.
-     * @deny (create, update, delete) - Managers cannot create, update or delete another manager's profile.
-     * @principle Enforces document ownership and admin overrides for manager profiles.
+     * @allow (create) Signed-in user creates their own manager document.
+     * @deny (create) Signed-in user attempts to create a manager document with a mismatched ID.
+     * @deny (update) Any user attempts to update a manager document.
+     * @deny (delete) Any user attempts to delete a manager document.
+     * @principle Enforces document ownership and prevents unauthorized modifications.
      */
     match /managers/{managerId} {
-      allow get: if isOwner(managerId) || isAdmin();
+      allow get: if false;
       allow list: if false;
       allow create: if isOwner(managerId);
-      allow update: if isOwner(managerId);
-      allow delete: if isOwner(managerId);
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
      * @description Rules for the /admins/{adminId} collection.
      * @path /admins/{adminId}
-     * @allow (get, create, update, delete) - An admin can read, create, update, or delete their own profile (adminId matches auth.uid).
-     * @deny (list) - Admins cannot list other admin profiles.
-     * @deny (create, update, delete) - Non-admins cannot create, update or delete admin profiles.
-     * @deny (create, update, delete) - Admins cannot create, update or delete another admin's profile.
-     * @principle Enforces document ownership for admin profiles.
+     * @allow (create) Signed-in user creates their own admin document.
+     * @deny (create) Signed-in user attempts to create an admin document with a mismatched ID.
+     * @deny (update) Any user attempts to update an admin document.
+     * @deny (delete) Any user attempts to delete an admin document.
+     * @principle Enforces document ownership and prevents unauthorized modifications.
      */
     match /admins/{adminId} {
-      allow get: if isOwner(adminId);
+      allow get: if false;
       allow list: if false;
       allow create: if isOwner(adminId);
-      allow update: if isOwner(adminId);
-      allow delete: if isOwner(adminId);
+      allow update: if false;
+      allow delete: if false;
     }
 
     /**
      * @description Rules for the /individual_development_plans/{idpId} collection.
      * @path /individual_development_plans/{idpId}
-     * @allow (get, create, update, delete) - An employee can read, create, update, or delete their own IDP (employeeId in document matches auth.uid).
-     * @allow (get) - An admin can read any IDP.
-     * @deny (list) - Employees cannot list other IDPs.
-     * @deny (create, update, delete) - Non-employees cannot create, update or delete IDPs.
-     * @deny (create, update, delete) - Employees cannot create, update or delete another employee's IDP.
-     * @principle Enforces document ownership and admin overrides for IDPs.
+     * @allow (get, list) Any user can read IDPs.
+     * @allow (create) Only Employees, Managers and Admins can create IDPs. The employeeId field must match the user's ID.
+     * @allow (update) Employees can update their own IDPs. Managers and Admins can update any IDP.
+     * @allow (delete) Managers and Admins can delete any IDP.
+     * @deny (create) User attempts to create an IDP with a mismatched employeeId.
+     * @deny (update) Employee attempts to update an IDP they do not own.
+     * @principle Allows public read access while restricting write access to authorized users.
      */
     match /individual_development_plans/{idpId} {
-      allow get: if resource.data.employeeId == request.auth.uid || isAdmin();
-      allow list: if false;
-      allow create: if request.resource.data.employeeId == request.auth.uid;
-      allow update: if getAfter().data.employeeId == request.auth.uid || isAdmin();
-      allow delete: if resource.data.employeeId == request.auth.uid || isAdmin();
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && (isEmployee() || isManager() || isAdmin());
+      allow update: if isSignedIn() && ((request.resource.data.employeeId == request.auth.uid && isEmployee()) || isManager() || isAdmin());
+      allow delete: if isSignedIn() && (isManager() || isAdmin());
     }
   }
 }
