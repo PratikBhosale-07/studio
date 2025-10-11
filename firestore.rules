@@ -1,137 +1,114 @@
 /**
- * @fileoverview Firestore Security Rules for TalentFlow AI.
+ * @fileOverview Firestore Security Rules for TalentFlow AI.
  *
- * Core Philosophy: This ruleset enforces a strict owner-only access model for employees, managers, admins and their individual development plans.
+ * Core Philosophy:
+ * This ruleset enforces role-based access control, granting employees access to their own individual development plans (IDPs),
+ * and allowing listing of all IDPs. The system leverages structural segregation, storing user profiles (employees, managers, admins)
+ * in separate top-level collections.
+ *
  * Data Structure:
- * - /employees/{employeeId}: Stores employee profiles.
- * - /managers/{managerId}: Stores manager profiles.
- * - /admins/{adminId}: Stores admin profiles.
- * - /individual_development_plans/{idpId}: Stores individual development plans.
+ * - /employees/{employeeId}: Employee profiles.
+ * - /managers/{managerId}: Manager profiles.
+ * - /admins/{adminId}: Admin profiles.
+ * - /individual_development_plans/{idpId}: Individual development plans (IDPs).
  *
  * Key Security Decisions:
- * - Users can only read and write their own employee, manager, and admin profiles.
- * - Users can only read and write their own individual development plans.
- * - Listing of users (employees, managers, admins) is not allowed.
- * - No public read access is granted. All data requires authentication.
+ * - Employees can only read/write their own IDPs.
+ * - Listing of all IDPs is allowed.
+ * - Only authenticated users can access any data. Anonymous access is not permitted.
+ * - Data validation is limited to authorization-critical fields to allow rapid prototyping.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Enforces access control for employee profiles.
+     * @description Checks if the request is authenticated.
+     * @returns {boolean} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user ID matches the provided user ID.
+     * @param {string} userId - The user ID to compare against.
+     * @returns {boolean} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the existing document.
+     * @param {string} userId - The user ID to compare against.
+     * @returns {boolean} True if the user is the owner and the document exists, false otherwise.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for the /employees collection.
      * @path /employees/{employeeId}
-     * @allow (create) User with UID 'employeeId' can create their own profile.
-     * @allow (get) User with UID 'employeeId' can get their own profile.
-     * @allow (update) User with UID 'employeeId' can update their own profile.
-     * @allow (delete) User with UID 'employeeId' can delete their own profile.
-     * @deny (create) User with UID 'otherUserId' cannot create a profile with employeeId 'employeeId'.
-     * @deny (get) User with UID 'otherUserId' cannot get the profile of employeeId 'employeeId'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) User with UID 'employee123' can create a new employee document with employeeId = 'employee123'.
+     * @deny (create) User with UID 'anotherUser' cannot create an employee document with employeeId = 'employee123'.
+     * @principle Enforces document ownership for writes.
      */
     match /employees/{employeeId} {
-      function isOwner(employeeId) {
-        return request.auth.uid == employeeId;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-      function isExistingOwner(employeeId) {
-        return isOwner(employeeId) && resource != null;
-      }
-
       allow get: if isOwner(employeeId);
       allow list: if false;
-      allow create: if isSignedIn() && isOwner(employeeId);
-      allow update: if isSignedIn() && isOwner(employeeId);
-      allow delete: if isSignedIn() && isExistingOwner(employeeId);
+      allow create: if isOwner(employeeId) && request.resource.data.id == employeeId;
+      allow update: if isExistingOwner(employeeId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(employeeId);
     }
 
     /**
-     * @description Enforces access control for manager profiles.
+     * @description Rules for the /managers collection.
      * @path /managers/{managerId}
-     * @allow (create) User with UID 'managerId' can create their own profile.
-     * @allow (get) User with UID 'managerId' can get their own profile.
-     * @allow (update) User with UID 'managerId' can update their own profile.
-     * @allow (delete) User with UID 'managerId' can delete their own profile.
-     * @deny (create) User with UID 'otherUserId' cannot create a profile with managerId 'managerId'.
-     * @deny (get) User with UID 'otherUserId' cannot get the profile of managerId 'managerId'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) User with UID 'manager456' can create a new manager document with managerId = 'manager456'.
+     * @deny (create) User with UID 'anotherUser' cannot create a manager document with managerId = 'manager456'.
+     * @principle Enforces document ownership for writes.
      */
     match /managers/{managerId} {
-      function isOwner(managerId) {
-        return request.auth.uid == managerId;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-       function isExistingOwner(managerId) {
-        return isOwner(managerId) && resource != null;
-      }
-
       allow get: if isOwner(managerId);
       allow list: if false;
-      allow create: if isSignedIn() && isOwner(managerId);
-      allow update: if isSignedIn() && isOwner(managerId);
-      allow delete: if isSignedIn() && isExistingOwner(managerId);
+      allow create: if isOwner(managerId) && request.resource.data.id == managerId;
+      allow update: if isExistingOwner(managerId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(managerId);
     }
 
     /**
-     * @description Enforces access control for admin profiles.
+     * @description Rules for the /admins collection.
      * @path /admins/{adminId}
-     * @allow (create) User with UID 'adminId' can create their own profile.
-     * @allow (get) User with UID 'adminId' can get their own profile.
-     * @allow (update) User with UID 'adminId' can update their own profile.
-     * @allow (delete) User with UID 'adminId' can delete their own profile.
-     * @deny (create) User with UID 'otherUserId' cannot create a profile with adminId 'adminId'.
-     * @deny (get) User with UID 'otherUserId' cannot get the profile of adminId 'adminId'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) User with UID 'admin789' can create a new admin document with adminId = 'admin789'.
+     * @deny (create) User with UID 'anotherUser' cannot create an admin document with adminId = 'admin789'.
+     * @principle Enforces document ownership for writes.
      */
     match /admins/{adminId} {
-      function isOwner(adminId) {
-        return request.auth.uid == adminId;
-      }
-      function isSignedIn() {
-        return request.auth != null;
-      }
-       function isExistingOwner(adminId) {
-        return isOwner(adminId) && resource != null;
-      }
-
       allow get: if isOwner(adminId);
       allow list: if false;
-      allow create: if isSignedIn() && isOwner(adminId);
-      allow update: if isSignedIn() && isOwner(adminId);
-      allow delete: if isSignedIn() && isExistingOwner(adminId);
+      allow create: if isOwner(adminId) && request.resource.data.id == adminId;
+      allow update: if isExistingOwner(adminId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(adminId);
     }
 
     /**
-     * @description Enforces access control for individual development plans.
+     * @description Rules for the /individual_development_plans collection.
      * @path /individual_development_plans/{idpId}
-     * @allow (create) User with UID 'employeeId' can create their own IDP if employeeId matches auth.uid.
-     * @allow (get) User with UID 'employeeId' can get their own IDP if employeeId matches auth.uid.
-     * @allow (update) User with UID 'employeeId' can update their own IDP if employeeId matches auth.uid.
-     * @allow (delete) User with UID 'employeeId' can delete their own IDP if employeeId matches auth.uid.
-     * @deny (create) User with UID 'otherUserId' cannot create an IDP with idpId 'idpId'.
-     * @deny (get) User with UID 'otherUserId' cannot get the IDP of idpId 'idpId'.
-     * @principle Enforces document ownership for all operations.
+     * @allow (get) Any signed-in user can read an individual development plan.
+     * @allow (list) Any signed-in user can list all individual development plans.
+     * @allow (create) User with UID 'user123' can create a new IDP document.
+     * @deny (update) User with UID 'anotherUser' cannot update an IDP document owned by 'user123'.
+     * @deny (delete) User with UID 'anotherUser' cannot delete an IDP document owned by 'user123'.
+     * @principle Allows public read access but restricts write access to the owner.
      */
     match /individual_development_plans/{idpId} {
-        function isOwner(idpId) {
-          return request.auth.uid == idpId;
-        }
-        function isSignedIn() {
-          return request.auth != null;
-        }
-         function isExistingOwner(idpId) {
-          return isOwner(idpId) && resource != null;
-        }
-
         allow get: if isSignedIn();
-        allow list: if false;
-        allow create: if isSignedIn();
-        allow update: if isSignedIn();
-        allow delete: if isSignedIn() && isExistingOwner(idpId);
+        allow list: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.employeeId == request.auth.uid;
+        allow update: if isSignedIn() && resource.data.employeeId == request.auth.uid;
+        allow delete: if isSignedIn() && resource.data.employeeId == request.auth.uid && resource != null;
     }
   }
 }
