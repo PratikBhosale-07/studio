@@ -110,11 +110,6 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
             <Plus /> Create New IDP
           </DialogTitle>
         </DialogHeader>
-        <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="absolute right-4 top-4">
-              <X className="h-4 w-4" />
-            </Button>
-        </DialogClose>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title">IDP Title *</Label>
