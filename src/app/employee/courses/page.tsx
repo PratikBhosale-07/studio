@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { Trash2, PlusCircle, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, ExternalLink, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 
@@ -90,6 +90,7 @@ function CoursesContent() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+               <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               <nav className="grid gap-6 text-lg font-medium">
                  <Link href="#" className="flex items-center gap-2 text-lg font-semibold mb-4">
                   <TrendingUp className="h-6 w-6" />

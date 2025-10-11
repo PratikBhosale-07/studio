@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Menu, Mountain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -68,6 +68,7 @@ export default function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+              <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               <nav className="grid gap-6 text-lg font-medium">
                 <Link
                   href="/"

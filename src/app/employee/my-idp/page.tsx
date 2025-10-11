@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { Plus, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, Menu, Milestone, ChevronRight, Calendar, User, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CreateIdpDialog } from '@/components/idp/create-idp-dialog';
 import { collection, query, where, getFirestore, doc } from 'firebase/firestore';
@@ -124,6 +124,7 @@ function MyIdpContent() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left">
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 <nav className="grid gap-4 text-base font-medium">
                   <Link href="#" className="flex items-center gap-2 text-lg font-semibold mb-4">
                     <TrendingUp className="h-6 w-6" />
