@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
@@ -109,6 +110,9 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
           <DialogTitle className="flex items-center gap-2">
             <Plus /> Create New IDP
           </DialogTitle>
+          <DialogDescription className="sr-only">
+              Fill out the form to create a new Individual Development Plan.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
           <div className="grid gap-2">
