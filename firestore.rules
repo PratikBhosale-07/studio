@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Manages access to employee profiles.
+     * @path /employees/{employeeId}
+     */
+    match /employees/{employeeId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(employeeId) {
+        return request.auth.uid == employeeId;
+      }
+
+      // Helper function to check if the user is the owner of the document and the document exists
+      function isExistingOwner(employeeId) {
+        return isOwner(employeeId) && exists(/databases/$(database)/documents/employees/$(employeeId));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(employeeId);
+      allow update: if isSignedIn() && isOwner(employeeId) && request.auth.uid == resource.data.uid;
+      allow delete: if isSignedIn() && isOwner(employeeId);
+    }
+
+    /**
+     * @description Manages access to manager profiles.
+     * @path /managers/{managerId}
+     */
+    match /managers/{managerId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(managerId) {
+        return request.auth.uid == managerId;
+      }
+
+      // Helper function to check if the user is the owner of the document and the document exists
+      function isExistingOwner(managerId) {
+        return isOwner(managerId) && exists(/databases/$(database)/documents/managers/$(managerId));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(managerId);
+      allow update: if isSignedIn() && isOwner(managerId) && request.auth.uid == resource.data.uid;
+      allow delete: if isSignedIn() && isOwner(managerId);
+    }
+
+    /**
+     * @description Manages access to admin profiles.
+     * @path /admins/{adminId}
+     */
+    match /admins/{adminId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(adminId) {
+        return request.auth.uid == adminId;
+      }
+
+      // Helper function to check if the user is the owner of the document and the document exists
+      function isExistingOwner(adminId) {
+        return isOwner(adminId) && exists(/databases/$(database)/documents/admins/$(adminId));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(adminId);
+      allow update: if isSignedIn() && isOwner(adminId) && request.auth.uid == resource.data.uid;
+      allow delete: if isSignedIn() && isOwner(adminId);
+    }
+
+    /**
+     * @description Manages access to individual development plans.
+     * @path /individual_development_plans/{idpId}
+     */
+    match /individual_development_plans/{idpId} {
+      // Helper function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // Helper function to check if the user is the owner of the document
+      function isOwner(employeeId) {
+        return request.auth.uid == resource.data.employeeId;
+      }
+
+      // Helper function to check if the user is the owner of the document and the document exists
+      function isExistingOwner(employeeId) {
+        return isOwner(employeeId) && exists(/databases/$(database)/documents/individual_development_plans/$(idpId));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.employeeId == request.auth.uid;
+      allow update: if isSignedIn() && request.resource.data.employeeId == request.auth.uid;
+      allow delete: if isSignedIn() && request.resource.data.employeeId == request.auth.uid;
+    }
+  }
+}

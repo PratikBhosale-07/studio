@@ -1,0 +1,249 @@
+{
+  "entities": {
+    "Employee": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Employee",
+      "type": "object",
+      "description": "Represents an employee within the TalentFlow AI system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Employee entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the employee."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the employee."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the employee.",
+          "format": "email"
+        },
+        "jobTitle": {
+          "type": "string",
+          "description": "The current job title of the employee."
+        },
+        "department": {
+          "type": "string",
+          "description": "The department the employee belongs to."
+        },
+        "managerId": {
+          "type": "string",
+          "description": "Reference to Manager. (Relationship: Manager 1:N Employee). Nullable if the employee has no manager."
+        },
+        "idpId": {
+          "type": "string",
+          "description": "Reference to Individual Development Plan. (Relationship: Employee 1:1 IDP)"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "jobTitle",
+        "department",
+        "idpId"
+      ]
+    },
+    "Manager": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Manager",
+      "type": "object",
+      "description": "Represents a manager within the TalentFlow AI system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Manager entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the manager."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the manager."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the manager.",
+          "format": "email"
+        },
+        "department": {
+          "type": "string",
+          "description": "The department the manager leads."
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "department"
+      ]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator within the TalentFlow AI system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Admin entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the administrator."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the administrator."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the administrator.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email"
+      ]
+    },
+    "IndividualDevelopmentPlan": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "IndividualDevelopmentPlan",
+      "type": "object",
+      "description": "Represents an individual development plan for an employee.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the IndividualDevelopmentPlan entity."
+        },
+        "employeeId": {
+          "type": "string",
+          "description": "Reference to Employee. (Relationship: Employee 1:1 IDP)"
+        },
+        "goals": {
+          "type": "array",
+          "description": "List of development goals for the employee.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The starting date of the IDP.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The ending date of the IDP.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the IDP (e.g., 'In Progress', 'Completed', 'Not Started')."
+        },
+        "managerFeedback": {
+          "type": "string",
+          "description": "Feedback from the manager regarding the employee's progress on the IDP."
+        },
+        "skillGapAnalysis": {
+          "type": "string",
+          "description": "Analysis of the skill gaps between the employee's current skills and the skills required for their desired role."
+        }
+      },
+      "required": [
+        "id",
+        "employeeId",
+        "goals",
+        "startDate",
+        "endDate",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/employees/{employeeId}",
+        "definition": {
+          "entityName": "Employee",
+          "schema": {
+            "$ref": "#/backend/entities/Employee"
+          },
+          "description": "Stores employee profiles. The existence of a document indicates the user is an employee. Params include employeeId.",
+          "params": [
+            {
+              "name": "employeeId",
+              "description": "The unique identifier for the employee."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/managers/{managerId}",
+        "definition": {
+          "entityName": "Manager",
+          "schema": {
+            "$ref": "#/backend/entities/Manager"
+          },
+          "description": "Stores manager profiles. The existence of a document indicates the user is a manager. Params include managerId.",
+          "params": [
+            {
+              "name": "managerId",
+              "description": "The unique identifier for the manager."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Stores admin profiles. The existence of a document indicates the user is an admin. Params include adminId.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier for the admin."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/individual_development_plans/{idpId}",
+        "definition": {
+          "entityName": "IndividualDevelopmentPlan",
+          "schema": {
+            "$ref": "#/backend/entities/IndividualDevelopmentPlan"
+          },
+          "description": "Stores individual development plans. Params include idpId.",
+          "params": [
+            {
+              "name": "idpId",
+              "description": "The unique identifier for the individual development plan."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to securely manage employee, manager, and admin data, along with individual development plans. It prioritizes authorization independence through denormalization and structural segregation for clear access control.  Different dashboards for employees, managers, and admins are supported by segregating user profiles into distinct collections, each tailored to its role. This segregation enables role-based dashboard views without complex authorization logic. To avoid hierarchical authorization dependencies and support atomic operations, authorization data is denormalized.  \n\nSpecifically: Each user profile (Employee, Manager, Admin) is stored in its own top-level collection.  This design supports QAPs by ensuring that list operations are always secure. Each collection is designed for homogeneous security, so rules do not need to filter based on document content.  \n\nThe structure also supports the integrity of ownership, timestamps, and denormalized data. While timestamps aren't explicitly modeled in the current schema, the structure can easily accommodate them within the document data. Denormalization ensures that dependent data remains consistent, even during updates. Because of DBAC (Database-Based Access Control) is enforced, roles are implicitly determined by presence in one of these collections, eliminating the need for custom claims."
+  }
+}
