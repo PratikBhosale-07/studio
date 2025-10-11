@@ -1,12 +1,13 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirebaseClientProvider, useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Users, Target, Briefcase } from 'lucide-react';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 const overallStats = [
     { name: 'Total Users', value: '1,420', icon: <Users className="w-4 h-4 text-muted-foreground" /> },
@@ -31,20 +32,16 @@ const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3
 
 function AdminDashboardContent() {
   const { user, isUserLoading } = useUser();
-  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  
+  useAuthGuard();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/login');
-    return null;
   }
 
   return (

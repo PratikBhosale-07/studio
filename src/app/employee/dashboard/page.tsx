@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 const skillData = [
   { name: 'technical', value: 75 },
@@ -23,6 +25,8 @@ function EmployeeDashboardContent() {
   const auth = getAuth();
   const [isClient, setIsClient] = useState(false);
 
+  useAuthGuard();
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -32,13 +36,8 @@ function EmployeeDashboardContent() {
     router.push('/login');
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/login');
-    return null;
   }
 
   const NavLinks = () => (

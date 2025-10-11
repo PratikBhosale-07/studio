@@ -9,6 +9,8 @@ import { Trash2, PlusCircle, TrendingUp, Home, Star, FileText, Lightbulb, Book, 
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
+
 
 const initialCourses = [
   { id: 1, title: 'Advanced TypeScript for Enterprise', provider: 'Udemy' },
@@ -21,6 +23,8 @@ function CoursesContent() {
   const router = useRouter();
   const auth = getAuth();
   const [courses, setCourses] = useState(initialCourses);
+  
+  useAuthGuard();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -37,13 +41,8 @@ function CoursesContent() {
     setCourses([...courses, newCourse]);
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/login');
-    return null;
   }
   
   const NavLinks = () => (

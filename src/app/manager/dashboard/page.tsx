@@ -1,3 +1,4 @@
+
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirebaseClientProvider, useUser } from '@/firebase';
@@ -8,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Users, Target, Activity } from 'lucide-react';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 const teamData = [
   { name: 'Alice', progress: 75, idpStatus: 'On Track' },
@@ -27,20 +29,16 @@ const skillData = [
 
 function ManagerDashboardContent() {
   const { user, isUserLoading } = useUser();
-  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+
+  useAuthGuard('/login');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/login');
-    return null;
   }
 
   return (
