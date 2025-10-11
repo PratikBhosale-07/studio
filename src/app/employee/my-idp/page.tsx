@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { Plus, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, Menu, Road } from 'lucide-react';
+import { Plus, TrendingUp, Home, Star, FileText, Lightbulb, Book, LogOut, Menu, Milestone } from 'lucide-react';
 import Link from 'next/link';
 import { getAuth, signOut } from 'firebase/auth';
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
@@ -39,7 +39,7 @@ function MyIdpContent() {
       </Button>
       <Button asChild variant="default" className='justify-start'>
         <Link href="/employee/my-idp" className="flex items-center gap-2">
-          <Road className="h-5 w-5" /> My IDP
+          <Milestone className="h-5 w-5" /> My IDP
         </Link>
       </Button>
       <Button asChild variant={isMobile ? "ghost" : "link"} className="text-muted-foreground hover:text-foreground justify-start">
@@ -101,7 +101,7 @@ function MyIdpContent() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className='flex items-center gap-4'>
                     <div className='p-3 bg-blue-500/20 rounded-lg'>
-                        <Road className="h-8 w-8 text-blue-400" />
+                        <Milestone className="h-8 w-8 text-blue-400" />
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
                         My Individual Development Plans
