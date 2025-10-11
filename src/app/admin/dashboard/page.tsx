@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -32,6 +32,11 @@ const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3
 function AdminDashboardContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   if (isUserLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -53,7 +58,7 @@ function AdminDashboardContent() {
           </Button>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
              {overallStats.map(stat => (
                  <Card key={stat.name}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -67,36 +72,40 @@ function AdminDashboardContent() {
              ))}
           </div>
            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
+              <Card className="col-span-1 lg:col-span-4">
                 <CardHeader>
                   <CardTitle>User Engagement Over Time</CardTitle>
                    <CardDescription>Platform engagement trends across quarters.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={engagementData}>
-                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                        <Bar dataKey="engagement" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                   </ResponsiveContainer>
+                  {isClient && (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={engagementData}>
+                          <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                          <Bar dataKey="engagement" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </CardContent>
               </Card>
-              <Card className="col-span-4 lg:col-span-3">
+              <Card className="col-span-1 lg:col-span-3">
                  <CardHeader>
                     <CardTitle>Role Distribution</CardTitle>
                     <CardDescription>Breakdown of user roles in the system.</CardDescription>
                  </CardHeader>
                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                            <Pie data={roleDistributionData} cx="50%" cy="50%" labelLine={false} outerRadius={80} dataKey="value" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                                {roleDistributionData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {isClient && (
+                      <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                              <Pie data={roleDistributionData} cx="50%" cy="50%" labelLine={false} outerRadius={80} dataKey="value" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                                  {roleDistributionData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                  ))}
+                              </Pie>
+                          </PieChart>
+                      </ResponsiveContainer>
+                    )}
                  </CardContent>
               </Card>
            </div>

@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect, useState } from 'react';
 
 const chartData = [
   { name: 'Jan', total: Math.floor(Math.random() * 20) + 10 },
@@ -15,6 +16,12 @@ const chartData = [
 ];
 
 export default function DashboardPreviewSection() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <section id="dashboard" className="py-20 sm:py-32">
       <div className="container mx-auto px-4">
@@ -34,7 +41,7 @@ export default function DashboardPreviewSection() {
             <TabsTrigger value="admin">Admin</TabsTrigger>
           </TabsList>
 
-          <div className="bg-card/30 p-4 rounded-xl border-4 border-card/50 shadow-2xl shadow-black/5">
+          <div className="bg-card/30 p-2 sm:p-4 rounded-xl border-2 sm:border-4 border-card/50 shadow-2xl shadow-black/5">
             <TabsContent value="employee" className="mt-0">
               <Card className="bg-background">
                 <CardHeader>
@@ -71,26 +78,28 @@ export default function DashboardPreviewSection() {
                   <CardTitle>Team Skill Progress</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis
-                        dataKey="name"
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke="#888888"
-                        fontSize={12}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(value) => `${value}`}
-                      />
-                      <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {isClient && (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                          dataKey="name"
+                          stroke="#888888"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          stroke="#888888"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(value) => `${value}`}
+                        />
+                        <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -102,15 +111,15 @@ export default function DashboardPreviewSection() {
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-secondary rounded-lg text-center">
                     <p className="text-sm text-muted-foreground">IDPs Active</p>
-                    <p className="text-3xl font-bold">1,254</p>
+                    <p className="text-2xl sm:text-3xl font-bold">1,254</p>
                   </div>
                   <div className="p-4 bg-secondary rounded-lg text-center">
                     <p className="text-sm text-muted-foreground">Top Skill</p>
-                    <p className="text-3xl font-bold">Python</p>
+                    <p className="text-2xl sm:text-3xl font-bold">Python</p>
                   </div>
                   <div className="p-4 bg-secondary rounded-lg text-center">
                     <p className="text-sm text-muted-foreground">Completion Rate</p>
-                    <p className="text-3xl font-bold">82%</p>
+                    <p className="text-2xl sm:text-3xl font-bold">82%</p>
                   </div>
                 </CardContent>
               </Card>

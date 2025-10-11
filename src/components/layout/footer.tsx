@@ -4,7 +4,7 @@ import { Mountain, Github, Twitter, Linkedin } from 'lucide-react';
 export default function Footer() {
   return (
     <footer id="contact" className="bg-secondary text-secondary-foreground">
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <div className="space-y-4">
             <Link href="#home" className="flex items-center space-x-2">
@@ -60,7 +60,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             &copy; {new Date().getFullYear()} TalentFlow AI. All rights reserved.
           </p>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">

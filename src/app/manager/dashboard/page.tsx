@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from '@/components/ui/progress';
@@ -28,6 +28,11 @@ const skillData = [
 function ManagerDashboardContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   if (isUserLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -78,12 +83,12 @@ function ManagerDashboardContent() {
               </Card>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
+              <Card className="col-span-1 lg:col-span-4">
                 <CardHeader>
                   <CardTitle>Team IDP Tracking</CardTitle>
                   <CardDescription>Monitor the development progress of your team.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -108,21 +113,23 @@ function ManagerDashboardContent() {
                   </Table>
                 </CardContent>
               </Card>
-              <Card className="col-span-4 lg:col-span-3">
+              <Card className="col-span-1 lg:col-span-3">
                 <CardHeader>
                   <CardTitle>Team Skill Analytics</CardTitle>
                   <CardDescription>Current skill distribution in your team.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={skillData} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" />
-                      <YAxis dataKey="skill" type="category" width={80} />
-                      <Tooltip />
-                      <Bar dataKey="level" fill="hsl(var(--primary))" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {isClient && (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={skillData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis dataKey="skill" type="category" width={80} />
+                        <Tooltip />
+                        <Bar dataKey="level" fill="hsl(var(--primary))" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </CardContent>
               </Card>
             </div>

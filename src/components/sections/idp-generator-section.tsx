@@ -34,7 +34,7 @@ export default function IdpGeneratorSection() {
             Fill out the form below to generate a sample Individual Development Plan.
           </p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           <Card>
             <CardHeader>
               <CardTitle>Employee Details</CardTitle>
@@ -74,7 +74,7 @@ export default function IdpGeneratorSection() {
                   })}
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground pt-10">
+                <div className="text-center text-muted-foreground pt-10 px-4">
                   <p>Your personalized IDP will appear here.</p>
                 </div>
               )}

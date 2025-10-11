@@ -37,14 +37,14 @@ const Node = ({ role, description, status, isLast }: { role: string; description
   };
 
   return (
-    <div className="relative flex-1 min-w-[12rem]">
+    <div className="relative flex-1 min-w-[10rem] sm:min-w-[12rem] z-10">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <div
               className={`rounded-lg p-4 text-center transition-all duration-300 ${statusStyles[status as keyof typeof statusStyles]}`}
             >
-              <h4 className="font-semibold">{role}</h4>
+              <h4 className="font-semibold text-sm sm:text-base">{role}</h4>
               {status === 'completed' && <CheckCircle className="mx-auto mt-2 h-5 w-5 text-primary" />}
             </div>
           </TooltipTrigger>
@@ -54,7 +54,10 @@ const Node = ({ role, description, status, isLast }: { role: string; description
         </Tooltip>
       </TooltipProvider>
       {!isLast && (
-        <div className="absolute top-1/2 left-full h-0.5 w-full bg-border -translate-y-1/2" />
+        <div className="absolute top-1/2 left-full h-0.5 w-full bg-border -translate-y-1/2 hidden md:block" />
+      )}
+       {!isLast && (
+        <div className="absolute top-full left-1/2 w-0.5 h-16 bg-border -translate-x-1/2 md:hidden" />
       )}
     </div>
   );
@@ -73,7 +76,7 @@ export default function CareerPathSection() {
           </p>
         </div>
         <div className="relative">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-16 md:gap-0 overflow-x-auto pb-8 -mb-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-16 md:gap-4 overflow-x-auto pb-8 -mb-8">
             {careerPath.map((node, index) => (
               <Node
                 key={node.role}
@@ -84,7 +87,6 @@ export default function CareerPathSection() {
               />
             ))}
           </div>
-          <div className="absolute inset-x-0 top-1/2 h-0.5 bg-border -translate-y-1/2 -z-10 hidden md:block" />
         </div>
       </div>
     </section>

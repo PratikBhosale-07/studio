@@ -3,6 +3,7 @@
 import { Bar, BarChart, Line, LineChart, PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { useEffect, useState } from 'react';
 
 const barChartData = [
   { month: 'January', desktop: 186 },
@@ -30,6 +31,12 @@ const radarChartData = [
 ];
 
 export default function AnalyticsSection() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <section id="analytics" className="py-20 sm:py-32">
       <div className="container mx-auto px-4">
@@ -47,17 +54,19 @@ export default function AnalyticsSection() {
               <CardTitle>Skill Adoption Over Time</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{
-                  desktop: { label: 'Skills', color: 'hsl(var(--primary))' },
-                }}
-                className="h-[250px] w-full"
-              >
-                <BarChart accessibilityLayer data={barChartData}>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-                </BarChart>
-              </ChartContainer>
+              {isClient && (
+                <ChartContainer
+                  config={{
+                    desktop: { label: 'Skills', color: 'hsl(var(--primary))' },
+                  }}
+                  className="h-[250px] w-full"
+                >
+                  <BarChart accessibilityLayer data={barChartData}>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
+                  </BarChart>
+                </ChartContainer>
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -65,23 +74,25 @@ export default function AnalyticsSection() {
               <CardTitle>Team vs. Average</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={{
-                  average: { label: 'Average', color: 'hsl(var(--secondary-foreground))' },
-                  today: { label: 'Your Team', color: 'hsl(var(--primary))' },
-                }}
-                className="h-[250px] w-full"
-              >
-                <LineChart
-                  accessibilityLayer
-                  data={lineChartData}
-                  margin={{ top: 20, left: -20, right: 20, bottom: 0 }}
+              {isClient && (
+                <ChartContainer
+                  config={{
+                    average: { label: 'Average', color: 'hsl(var(--secondary-foreground))' },
+                    today: { label: 'Your Team', color: 'hsl(var(--primary))' },
+                  }}
+                  className="h-[250px] w-full"
                 >
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="average" stroke="var(--color-average)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="today" stroke="var(--color-today)" strokeWidth={3} dot={false} />
-                </LineChart>
-              </ChartContainer>
+                  <LineChart
+                    accessibilityLayer
+                    data={lineChartData}
+                    margin={{ top: 20, left: -20, right: 20, bottom: 0 }}
+                  >
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line type="monotone" dataKey="average" stroke="var(--color-average)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="today" stroke="var(--color-today)" strokeWidth={3} dot={false} />
+                  </LineChart>
+                </ChartContainer>
+              )}
             </CardContent>
           </Card>
           <Card className="lg:col-span-3">
@@ -89,17 +100,19 @@ export default function AnalyticsSection() {
               <CardTitle>Competency Radar</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={{}} className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <Radar name="Your Team" dataKey="A" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
-                    <Radar name="Company Avg" dataKey="B" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              {isClient && (
+                <ChartContainer config={{}} className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarChartData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" />
+                      <Radar name="Your Team" dataKey="A" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
+                      <Radar name="Company Avg" dataKey="B" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.6} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              )}
             </CardContent>
           </Card>
         </div>
