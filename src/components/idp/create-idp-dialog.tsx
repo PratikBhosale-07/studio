@@ -54,6 +54,13 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
     formState: { errors, isSubmitting },
   } = useForm<IdpFormValues>({
     resolver: zodResolver(idpSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      careerGoal: '',
+      targetRole: '',
+      endDate: undefined,
+    },
   });
 
   const onSubmit = async (data: IdpFormValues) => {
