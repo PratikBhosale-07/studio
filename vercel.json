@@ -1,0 +1,14 @@
+{
+  "build": {
+    "env": {
+      "GENKIT_ENV": "production"
+    }
+  },
+  "functions": {
+    "src/ai/dev.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "buildCommand": "next build"
+}
