@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -78,8 +79,11 @@ function SignupPageContent() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background">
       <Card className="mx-auto max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Sign Up</CardTitle>
+        <CardHeader className="items-center text-center">
+          <div className="flex items-center gap-2 font-semibold text-lg">
+            <TrendingUp className="h-8 w-8 text-primary" />
+            <CardTitle>TalentFlow AI</CardTitle>
+          </div>
           <CardDescription>Enter your information to create an account</CardDescription>
         </CardHeader>
         <CardContent>

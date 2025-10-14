@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -66,8 +67,11 @@ function LoginPageContent() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background">
       <Card className="mx-auto max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+        <CardHeader className="items-center text-center">
+          <div className="flex items-center gap-2 font-semibold text-lg">
+            <TrendingUp className="h-8 w-8 text-primary" />
+            <CardTitle>TalentFlow AI</CardTitle>
+          </div>
           <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
