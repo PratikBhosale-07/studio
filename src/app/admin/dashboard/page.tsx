@@ -115,6 +115,7 @@ function AdminDashboardContent() {
               <Upload className="mr-2 h-4 w-4" />
               Update Datasets
             </Button>
+            <span className="hidden sm:inline">{user.email}</span>
             <ThemeToggle />
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" /> Logout
