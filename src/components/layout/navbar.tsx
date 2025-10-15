@@ -12,7 +12,6 @@ import { getAuth, signOut } from 'firebase/auth';
 const navLinks = [
   { href: '#home', label: 'Home' },
   { href: '#features', label: 'Features' },
-  { href: '#dashboard', label: 'Dashboard' },
   { href: '#about', label: 'About' },
   { href: '#contact', label: 'Contact' },
 ];
