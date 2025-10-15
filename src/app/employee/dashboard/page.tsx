@@ -160,8 +160,8 @@ function EmployeeDashboardContent() {
 
       <main className="flex-1 p-4 sm:p-6 space-y-8">
         {/* -- Dashboard Section -- */}
-        <section id="dashboard" className="grid gap-4 sm:gap-6 md:grid-cols-2">
-            <Card>
+        <section id="dashboard" className="grid gap-4 sm:gap-6">
+            <Card className="col-span-full">
                 <CardHeader>
                 <CardTitle>Career Growth - Senior Engineer</CardTitle>
                 <CardDescription>Target: Oct 8, 2026</CardDescription>
