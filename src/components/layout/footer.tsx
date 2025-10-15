@@ -61,7 +61,7 @@ export default function Footer() {
         </div>
         <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground text-center sm:text-left">
-            &copy; {new Date().getFullYear()} TalentFlow AI. All rights reserved.
+            &copy; {new Date().getFullYear()} TalentFlow AI. All rights reserved. | Made by Varahamihira SIH 2025 Group
           </p>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
             <a href="#" className="text-muted-foreground hover:text-primary">
