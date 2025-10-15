@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
+import { ThemeToggle } from '../theme-toggle';
 
 const navLinks = [
   { href: '#home', label: 'Home' },
@@ -46,6 +47,7 @@ export default function Navbar() {
           ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
+          <ThemeToggle />
           {!isUserLoading &&
             (user ? (
               <Button onClick={handleLogout} variant="ghost">Log Out</Button>
