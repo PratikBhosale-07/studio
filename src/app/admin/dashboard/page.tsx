@@ -174,9 +174,9 @@ function AdminDashboardContent() {
                                <Tooltip
                                 cursor={{fill: 'hsl(var(--muted))'}}
                                 contentStyle={{ 
-                                    background: 'hsl(var(--background))', 
+                                    background: 'white', 
                                     border: '1px solid hsl(var(--border))',
-                                    color: 'hsl(var(--foreground))'
+                                    color: 'black'
                                 }}
                               />
                               <Pie 
