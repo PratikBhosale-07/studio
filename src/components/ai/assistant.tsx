@@ -1,3 +1,4 @@
+
 'use client';
 
 import { assistantFlow, type AssistantFlowInput } from '@/ai/flows/assistant-flow';
@@ -13,12 +14,71 @@ type Message = {
   content: string;
 };
 
+const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return;
+      }
+      handler();
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler]);
+};
+
+function LogoIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+      <svg
+        {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <defs>
+            <linearGradient id="logo-gradient" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--accent))" />
+            </linearGradient>
+        </defs>
+        <path d="M12 2a10 10 0 1 0 10 10" stroke="url(#logo-gradient)" />
+        <path d="M12 2a10 10 0 1 0 10 10" stroke="url(#logo-gradient)" strokeDasharray="2 2" />
+        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8" fill="url(#logo-gradient)"/>
+      </svg>
+    );
+}
+
 export function Assistant() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const chatCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useClickOutside(chatCardRef, () => {
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  });
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -45,8 +105,12 @@ export function Assistant() {
       }));
 
       const result = await assistantFlow({ history, prompt: input });
-      const modelMessage: Message = { role: 'model', content: result.response };
-      setMessages((prev) => [...prev, modelMessage]);
+      if (result && result.response) {
+        const modelMessage: Message = { role: 'model', content: result.response };
+        setMessages((prev) => [...prev, modelMessage]);
+      } else {
+        throw new Error('Invalid response from assistant flow');
+      }
     } catch (error) {
       console.error('Error calling assistant flow:', error);
       const errorMessage: Message = {
@@ -59,23 +123,27 @@ export function Assistant() {
     }
   };
 
+  if (!isClient) return null;
+
   if (!isOpen) {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 rounded-full w-16 h-16 shadow-lg"
+        className="fixed bottom-6 right-6 z-50 rounded-full w-16 h-16 shadow-lg p-3 bg-background hover:bg-secondary border"
       >
-        <Bot className="w-8 h-8" />
+        <LogoIcon className="w-12 h-12" />
         <span className="sr-only">Open AI Assistant</span>
       </Button>
     );
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 z-50 w-96 h-[600px] shadow-2xl flex flex-col">
+    <Card className="fixed bottom-6 right-6 z-50 w-96 h-[600px] shadow-2xl flex flex-col" ref={chatCardRef}>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
-          <Bot className="w-6 h-6 text-primary" />
+          <div className="w-8 h-8">
+            <LogoIcon />
+          </div>
           <CardTitle>AI Assistant</CardTitle>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
@@ -100,7 +168,9 @@ export function Assistant() {
               >
                 {message.role === 'model' && (
                   <div className="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-primary-foreground" />
+                     <div className="w-5 h-5 text-primary-foreground">
+                        <LogoIcon />
+                     </div>
                   </div>
                 )}
                 <div
@@ -117,7 +187,9 @@ export function Assistant() {
             {isLoading && (
               <div className="flex justify-start gap-3">
                  <div className="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-primary-foreground" />
+                    <div className="w-5 h-5 text-primary-foreground">
+                        <LogoIcon />
+                    </div>
                   </div>
                 <div className="bg-secondary rounded-lg px-4 py-2 flex items-center">
                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
