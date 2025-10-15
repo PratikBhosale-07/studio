@@ -77,8 +77,8 @@ function CoursesContent() {
         </div>
         
         <div className="flex items-center gap-4">
-          <span className='hidden sm:inline'>{user.displayName || user.email}</span>
           <ThemeToggle />
+          <span className='hidden sm:inline'>{user.displayName || user.email}</span>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut className="mr-0 sm:mr-2 h-4 w-4" /><span className='hidden sm:inline'>Logout</span>
           </Button>
