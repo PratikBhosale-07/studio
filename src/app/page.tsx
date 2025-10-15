@@ -2,7 +2,6 @@ import Navbar from '@/components/layout/navbar';
 import HeroSection from '@/components/sections/hero-section';
 import FeaturesSection from '@/components/sections/features-section';
 import CareerPathSection from '@/components/sections/career-path-section';
-import AnalyticsSection from '@/components/sections/analytics-section';
 import IdpGeneratorSection from '@/components/sections/idp-generator-section';
 import AboutSection from '@/components/sections/about-section';
 import Footer from '@/components/layout/footer';
@@ -17,7 +16,6 @@ export default function Home() {
           <HeroSection />
           <FeaturesSection />
           <CareerPathSection />
-          <AnalyticsSection />
           <IdpGeneratorSection />
           <AboutSection />
         </main>
