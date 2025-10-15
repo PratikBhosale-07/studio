@@ -29,10 +29,8 @@ export type AssistantFlowOutput = z.infer<typeof AssistantFlowOutputSchema>;
 
 
 export async function assistantFlow(input: AssistantFlowInput): Promise<AssistantFlowOutput> {
-  const model = ai.getModel('googleai/gemini-2.5-flash');
 
   const { response } = await ai.generate({
-    model,
     history: input.history,
     prompt: `You are a helpful AI assistant for an application called "TalentFlow AI".
     Your purpose is to answer questions about the application and its features.
@@ -45,5 +43,5 @@ export async function assistantFlow(input: AssistantFlowInput): Promise<Assistan
     },
   });
 
-  return response.output()!;
+  return response.output!;
 }
