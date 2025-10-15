@@ -24,6 +24,7 @@ function MyIdpContent() {
   const router = useRouter();
   const auth = getAuth();
   const { toast } = useToast();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const firestore = getFirestore();
 
@@ -62,27 +63,28 @@ function MyIdpContent() {
     }
   }
 
-  const NavLinks = () => (
+  const NavLinks = ({onClick}: {onClick?: () => void}) => (
     <>
-      <Link href="/employee/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+      <Link href="/employee/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Home className="h-5 w-5" /> Dashboard
       </Link>
-      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-        <Star className="h-5 w-5" /> Skills
+      <Link href="/employee/my-idp" className="flex items-center gap-2 font-semibold text-primary" onClick={onClick}>
+          <FileText className="h-5 w-5" /> My IDP
       </Link>
-      <Link href="/employee/my-idp" className="flex items-center gap-2 text-primary font-semibold">
-          <Milestone className="h-5 w-5" /> My IDP
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-        <Lightbulb className="h-5 w-5" /> Recommendations
-      </Link>
-      <Link href="/employee/courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+      <Link href="/employee/courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Book className="h-5 w-5" /> Courses
+      </Link>
+      <Link href="/employee/dashboard#recommendations" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+        <Lightbulb className="h-5 w-5" /> Recommendations
       </Link>
     </>
   );
 
   const loading = isUserLoading || idpsLoading;
+
+  if (isUserLoading || !user) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
   return (
     <>
@@ -92,7 +94,7 @@ function MyIdpContent() {
           <div className="flex items-center gap-4">
             <Link href="#" className="flex items-center gap-2 font-semibold text-lg">
               <TrendingUp className="h-6 w-6 text-primary" />
-              <span>IDP System</span>
+              <span>TalentFlow</span>
             </Link>
           </div>
           <div className="flex items-center gap-4">
@@ -101,21 +103,21 @@ function MyIdpContent() {
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="mr-0 sm:mr-2 h-4 w-4" /><span className="hidden sm:inline">Logout</span>
             </Button>
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
+              <SheetContent side="right" className="bg-background/80 backdrop-blur-sm">
                 <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
                 <nav className="grid gap-6 text-lg font-medium mt-8">
                   <Link href="#" className="flex items-center gap-2 text-lg font-semibold mb-4">
                     <TrendingUp className="h-6 w-6" />
-                    <span>IDP System</span>
+                    <span>TalentFlow</span>
                   </Link>
-                  <NavLinks />
+                  <NavLinks onClick={() => setIsSheetOpen(false)} />
                 </nav>
               </SheetContent>
             </Sheet>

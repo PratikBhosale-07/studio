@@ -46,20 +46,8 @@ function EmployeeDashboardContent() {
   const router = useRouter();
   const auth = getAuth();
   const [isClient, setIsClient] = useState(false);
-  const [isIdpDialogOpen, setIsIdpDialogOpen] = useState(false);
-  const [isAddCourseDialogOpen, setIsAddCourseDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
   const { toast } = useToast();
-
-  const firestore = getFirestore();
-
-  const idpsQuery = useMemoFirebase(() => {
-    if (!user) return null;
-    return query(collection(firestore, 'individual_development_plans'), where('employeeId', '==', user.uid));
-  }, [firestore, user]);
-
-  const { data: idpItems, isLoading: idpsLoading, error: idpError } = useCollection<IndividualDevelopmentPlan>(idpsQuery);
 
   useAuthGuard();
 
@@ -72,67 +60,30 @@ function EmployeeDashboardContent() {
     router.push('/login');
   };
   
-  const removeCourse = (id: number) => {
-    setCourses(courses.filter(course => course.id !== id));
-  };
-
   const addCourse = (course: Course) => {
-    if (courses.some(c => c.id === course.id)) {
-        toast({
-            variant: 'destructive',
-            title: 'Course Already Added',
-            description: 'You are already enrolled in this course.',
-        });
-        return;
-    }
-    setCourses([...courses, course]);
+    // This is a placeholder. In a real app, you'd update a state or DB
     toast({
         title: 'Course Added',
-        description: `${course.title} has been added to your list.`,
+        description: `${course.title} has been added to your plan.`,
     });
   };
-  
-  const handleDeleteIdp = async (idpId: string) => {
-    if (!firestore) return;
-    const docRef = doc(firestore, 'individual_development_plans', idpId);
-    try {
-        deleteDocumentNonBlocking(docRef);
-        toast({
-            title: 'IDP Removed',
-            description: 'The Individual Development Plan has been successfully removed.',
-        });
-    } catch (error) {
-        console.error("Error removing document: ", error);
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'There was a problem removing the IDP.',
-        });
-    }
-  }
-
 
   if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
   
-  const loadingIdps = isUserLoading || idpsLoading;
-
   const NavLinks = ({onClick}: {onClick?: () => void}) => (
     <>
-      <Link href="#dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+      <Link href="/employee/dashboard" className="flex items-center gap-2 font-semibold text-primary" onClick={onClick}>
         <Home className="h-5 w-5" /> Dashboard
       </Link>
-      <Link href="#skills" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
-        <Star className="h-5 w-5" /> Skills
-      </Link>
-      <Link href="#my-idp" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+      <Link href="/employee/my-idp" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <FileText className="h-5 w-5" /> My IDP
       </Link>
-       <Link href="#courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+       <Link href="/employee/courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Book className="h-5 w-5" /> Courses
       </Link>
-      <Link href="#recommendations" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+      <Link href="/employee/dashboard#recommendations" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Lightbulb className="h-5 w-5" /> Recommendations
       </Link>
     </>
@@ -140,8 +91,6 @@ function EmployeeDashboardContent() {
 
   return (
     <>
-    <CreateIdpDialog open={isIdpDialogOpen} onOpenChange={setIsIdpDialogOpen} />
-    <AddCourseDialog open={isAddCourseDialogOpen} onOpenChange={setIsAddCourseDialogOpen} onAddCourse={addCourse} />
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
         <div className="flex items-center gap-4">
@@ -234,108 +183,6 @@ function EmployeeDashboardContent() {
             </Card>
         </section>
 
-        {/* -- My IDP Section -- */}
-        <section id="my-idp">
-            <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 p-6 rounded-xl shadow-inner mb-8">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-500/20 rounded-lg">
-                    <Milestone className="h-8 w-8 text-blue-400" />
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
-                    My Individual Development Plans
-                    </h1>
-                </div>
-                <Button
-                    onClick={() => setIsIdpDialogOpen(true)}
-                    className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105"
-                >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Create New IDP
-                </Button>
-                </div>
-            </div>
-
-            {loadingIdps ? (
-                <div className="space-y-4">
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-                </div>
-            ) : idpError ? (
-                <p className="text-destructive text-center">Error loading IDPs</p>
-            ) : (
-                <div className="space-y-4">
-                {idpItems && idpItems.length > 0 ? (
-                    idpItems.map((item) => (
-                    <Card key={item.id} className='hover:shadow-md transition-shadow'>
-                        <CardHeader>
-                        <CardTitle className='flex justify-between items-center'>
-                            {item.title}
-                            <div className="flex items-center gap-2">
-                            <Badge variant={item.status === 'Completed' ? 'secondary' : 'default'}>{item.status}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteIdp(item.id)}>
-                                <Trash2 className="h-5 w-5 text-destructive" />
-                            </Button>
-                            </div>
-                        </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <p className='text-muted-foreground'>{item.description}</p>
-                            <div className='flex flex-wrap gap-4 text-sm'>
-                                <div className='flex items-center gap-2'>
-                                    <User className='h-4 w-4 text-primary'/>
-                                    <strong>Target Role:</strong> {item.targetRole}
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <Calendar className='h-4 w-4 text-primary'/>
-                                    <strong>Target Date:</strong> {format(new Date(item.endDate), 'PPP')}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    ))
-                ) : (
-                    <div className="text-center text-muted-foreground py-10">
-                        <p>No IDPs found. Create one to get started!</p>
-                    </div>
-                )}
-                </div>
-            )}
-        </section>
-
-        {/* -- Courses Section -- */}
-        <section id="courses">
-            <Card>
-            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <CardTitle>My Courses</CardTitle>
-                    <CardDescription>Courses you are enrolled in or have completed.</CardDescription>
-                </div>
-                <Button onClick={() => setIsAddCourseDialogOpen(true)} className='w-full sm:w-auto'><PlusCircle className='mr-2 h-4 w-4'/>Add Course</Button>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                {courses.map((course) => (
-                    <div key={course.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg bg-secondary">
-                    <div>
-                        <p className="font-semibold">{course.title}</p>
-                        <p className="text-sm text-muted-foreground">{course.provider}</p>
-                    </div>
-                    <div className='flex items-center gap-2 self-end sm:self-center'>
-                        <Button variant="outline" size="sm" asChild>
-                            <a href="#" target="_blank">View <ExternalLink className="ml-2 h-3 w-3" /></a>
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => removeCourse(course.id)}>
-                        <Trash2 className="h-5 w-5 text-destructive" />
-                        </Button>
-                    </div>
-                    </div>
-                ))}
-                </div>
-            </CardContent>
-            </Card>
-        </section>
-
         {/* -- Recommendations Section -- */}
         <section id="recommendations">
              <Card>
@@ -379,7 +226,3 @@ export default function EmployeeDashboard() {
         </FirebaseClientProvider>
     )
 }
-
-    
-
-    
