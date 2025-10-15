@@ -1,7 +1,6 @@
 import Navbar from '@/components/layout/navbar';
 import HeroSection from '@/components/sections/hero-section';
 import FeaturesSection from '@/components/sections/features-section';
-import DashboardPreviewSection from '@/components/sections/dashboard-preview-section';
 import CareerPathSection from '@/components/sections/career-path-section';
 import AnalyticsSection from '@/components/sections/analytics-section';
 import IdpGeneratorSection from '@/components/sections/idp-generator-section';
@@ -17,7 +16,6 @@ export default function Home() {
         <main className="flex-1">
           <HeroSection />
           <FeaturesSection />
-          <DashboardPreviewSection />
           <CareerPathSection />
           <AnalyticsSection />
           <IdpGeneratorSection />
