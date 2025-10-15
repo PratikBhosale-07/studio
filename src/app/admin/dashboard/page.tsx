@@ -47,7 +47,7 @@ const renderActiveShape = (props: any) => {
 
   return (
     <g>
-      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill="hsl(var(--foreground))">
         {payload.name}
       </text>
       <Sector
@@ -145,9 +145,10 @@ function AdminDashboardContent() {
                   {isClient && (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={engagementData}>
-                          <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                          <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                            <Tooltip
+                            cursor={{fill: 'hsl(var(--muted))'}}
                             contentStyle={{ 
                                 background: 'hsl(var(--background))', 
                                 border: '1px solid hsl(var(--border))'
@@ -169,6 +170,7 @@ function AdminDashboardContent() {
                       <ResponsiveContainer width="100%" height={300}>
                           <PieChart>
                                <Tooltip
+                                cursor={{fill: 'hsl(var(--muted))'}}
                                 contentStyle={{ 
                                     background: 'hsl(var(--background))', 
                                     border: '1px solid hsl(var(--border))'
