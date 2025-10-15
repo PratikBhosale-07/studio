@@ -2,10 +2,10 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FirebaseClientProvider, useUser } from '@/firebase';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Sector, Tooltip } from 'recharts';
 import { Users, Target, Briefcase } from 'lucide-react';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
 
@@ -29,10 +29,61 @@ const roleDistributionData = [
 ];
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'];
 
+const renderActiveShape = (props: any) => {
+  const RADIAN = Math.PI / 180;
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))">{`${value} Users`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="hsl(var(--muted-foreground))">
+        {`(${(percent * 100).toFixed(2)}%)`}
+      </text>
+    </g>
+  );
+};
+
 
 function AdminDashboardContent() {
   const { user, isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const onPieEnter = useCallback((_: any, index: number) => {
+    setActiveIndex(index);
+  }, [setActiveIndex]);
   
   useAuthGuard();
 
@@ -80,6 +131,12 @@ function AdminDashboardContent() {
                       <BarChart data={engagementData}>
                           <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                           <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                           <Tooltip
+                            contentStyle={{ 
+                                background: 'hsl(var(--background))', 
+                                border: '1px solid hsl(var(--border))'
+                            }}
+                          />
                           <Bar dataKey="engagement" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -95,7 +152,23 @@ function AdminDashboardContent() {
                     {isClient && (
                       <ResponsiveContainer width="100%" height={300}>
                           <PieChart>
-                              <Pie data={roleDistributionData} cx="50%" cy="50%" labelLine={false} outerRadius={80} dataKey="value" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                               <Tooltip
+                                contentStyle={{ 
+                                    background: 'hsl(var(--background))', 
+                                    border: '1px solid hsl(var(--border))'
+                                }}
+                              />
+                              <Pie 
+                                activeIndex={activeIndex}
+                                activeShape={renderActiveShape}
+                                data={roleDistributionData} 
+                                cx="50%" 
+                                cy="50%" 
+                                innerRadius={60}
+                                outerRadius={80} 
+                                dataKey="value" 
+                                onMouseEnter={onPieEnter}
+                              >
                                   {roleDistributionData.map((entry, index) => (
                                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                   ))}
