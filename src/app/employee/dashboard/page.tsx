@@ -39,6 +39,7 @@ function EmployeeDashboardContent() {
   const auth = getAuth();
   const [isClient, setIsClient] = useState(false);
   const [isIdpDialogOpen, setIsIdpDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [courses, setCourses] = useState(initialCourses);
   const { toast } = useToast();
 
@@ -122,7 +123,7 @@ function EmployeeDashboardContent() {
     <>
     <CreateIdpDialog open={isIdpDialogOpen} onOpenChange={setIsIdpDialogOpen} />
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
+       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
         <div className="flex items-center gap-4">
           <Link href="#" className="flex items-center gap-2 font-semibold">
             <TrendingUp className="h-6 w-6 text-primary" />
@@ -136,21 +137,21 @@ function EmployeeDashboardContent() {
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Logout</span>
           </Button>
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
+            <SheetContent side="right" className="bg-background/80 backdrop-blur-sm">
                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
               <nav className="grid gap-6 text-lg font-medium mt-8">
                 <Link href="#" className="flex items-center gap-2 text-lg font-semibold mb-4">
                   <TrendingUp className="h-6 w-6" />
                   <span>TalentFlow</span>
                 </Link>
-                <NavLinks />
+                <NavLinks onClick={() => setIsSheetOpen(false)} />
               </nav>
             </SheetContent>
           </Sheet>
@@ -327,5 +328,3 @@ export default function EmployeeDashboard() {
         </FirebaseClientProvider>
     )
 }
-
-    
