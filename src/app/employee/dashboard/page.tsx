@@ -35,6 +35,12 @@ const initialCourses: Course[] = [
   { id: 2, title: 'Microservices with Node.js and React', provider: 'Coursera' },
 ];
 
+const recommendedCourses: Course[] = [
+    { id: 10, title: 'AI for Project Managers', provider: 'AI Academy' },
+    { id: 11, title: 'Advanced Communication Strategies', provider: 'Growth Institute' },
+    { id: 12, title: 'Cloud-Native Architecture Deep Dive', provider: 'TechGurus' },
+]
+
 function EmployeeDashboardContent() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -126,7 +132,7 @@ function EmployeeDashboardContent() {
        <Link href="#courses" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Book className="h-5 w-5" /> Courses
       </Link>
-      <Link href="#" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
+      <Link href="#recommendations" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
         <Lightbulb className="h-5 w-5" /> Recommendations
       </Link>
     </>
@@ -329,6 +335,37 @@ function EmployeeDashboardContent() {
             </CardContent>
             </Card>
         </section>
+
+        {/* -- Recommendations Section -- */}
+        <section id="recommendations">
+             <Card>
+                <CardHeader>
+                    <CardTitle className='flex items-center gap-2'>
+                        <Lightbulb className="h-6 w-6 text-primary"/>
+                        AI-Powered Recommendations
+                    </CardTitle>
+                    <CardDescription>Courses and resources tailored to help you reach your goals.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                    {recommendedCourses.map((course) => (
+                        <div key={course.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg bg-secondary">
+                        <div>
+                            <p className="font-semibold">{course.title}</p>
+                            <p className="text-sm text-muted-foreground">{course.provider}</p>
+                        </div>
+                        <div className='flex items-center gap-2 self-end sm:self-center'>
+                           <Button size="sm" onClick={() => addCourse(course)}>
+                                <Plus className="mr-2 h-4 w-4" /> Add to Plan
+                           </Button>
+                        </div>
+                        </div>
+                    ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </section>
+
       </main>
     </div>
     </>
@@ -342,5 +379,7 @@ export default function EmployeeDashboard() {
         </FirebaseClientProvider>
     )
 }
+
+    
 
     
