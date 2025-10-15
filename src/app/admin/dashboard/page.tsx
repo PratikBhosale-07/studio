@@ -47,7 +47,7 @@ const renderActiveShape = (props: any) => {
 
   return (
     <g>
-      <text x={cx} y={cy} dy={8} textAnchor="middle" fill="hsl(var(--foreground))">
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill="hsl(var(--foreground))" className="text-base font-semibold">
         {payload.name}
       </text>
       <Sector
@@ -70,9 +70,9 @@ const renderActiveShape = (props: any) => {
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))">{`${value} Users`}</text>
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="hsl(var(--muted-foreground))">
-        {`(${(percent * 100).toFixed(2)}%)`}
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" className="text-sm">{`${value} Users`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="hsl(var(--muted-foreground))" className="text-xs">
+        {`(Rate: ${(percent * 100).toFixed(2)}%)`}
       </text>
     </g>
   );
@@ -184,8 +184,8 @@ function AdminDashboardContent() {
                                 data={roleDistributionData} 
                                 cx="50%" 
                                 cy="50%" 
-                                innerRadius={60}
-                                outerRadius={80} 
+                                innerRadius={80}
+                                outerRadius={100} 
                                 dataKey="value" 
                                 onMouseEnter={onPieEnter}
                               >
