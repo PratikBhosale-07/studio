@@ -8,9 +8,11 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Users, Target, Activity, ArrowLeft } from 'lucide-react';
+import { Users, Target, Activity, ArrowLeft, LogOut } from 'lucide-react';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
 import { Button } from '@/components/ui/button';
+import { getAuth, signOut } from 'firebase/auth';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 type Skill = {
   skill: string;
@@ -85,6 +87,8 @@ const teamAverageSkills: Skill[] = [
 
 function ManagerDashboardContent() {
   const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const auth = getAuth();
   const [isClient, setIsClient] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
@@ -93,6 +97,11 @@ function ManagerDashboardContent() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
 
   const handleMemberSelect = (member: TeamMember) => {
     setSelectedMember(member);
@@ -113,8 +122,15 @@ function ManagerDashboardContent() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <div className="flex flex-col sm:gap-4 sm:py-4">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <h1 className="text-xl font-semibold">Manager Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <span className="hidden sm:inline">{user.email}</span>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Logout
+            </Button>
+          </div>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -229,3 +245,5 @@ export default function ManagerDashboard() {
         </FirebaseClientProvider>
     )
 }
+
+    
