@@ -9,10 +9,10 @@ export default function HeroSection() {
       <div className="container mx-auto flex h-full items-center justify-center text-center px-4">
         <div className="flex flex-col items-center space-y-8 animate-in fade-in slide-in-from-bottom-12 duration-1000">
           <div className="max-w-4xl">
-            <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
               Empower Growth with Intelligent IDP Recommendations
             </h1>
-            <p className="mt-6 text-lg text-primary-foreground/80 md:text-xl">
+            <p className="mt-6 text-lg text-muted-foreground md:text-xl">
               Transform your workforce with AI-powered Individual Development Plans. Align employee aspirations with business goals, identify skill gaps, and unlock true potential.
             </p>
           </div>
