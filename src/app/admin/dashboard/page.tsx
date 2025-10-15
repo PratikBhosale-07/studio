@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { FirebaseClientProvider, useUser } from '@/firebase';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { Upload, LogOut } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Sector, Tooltip } from 'recharts';
 import { Users, Target, Briefcase } from 'lucide-react';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { getAuth, signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const overallStats = [
     { name: 'Total Users', value: '1,420', icon: <Users className="w-4 h-4 text-muted-foreground" /> },
@@ -80,6 +83,8 @@ function AdminDashboardContent() {
   const { user, isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const auth = getAuth();
+  const router = useRouter();
 
   const onPieEnter = useCallback((_: any, index: number) => {
     setActiveIndex(index);
@@ -91,6 +96,11 @@ function AdminDashboardContent() {
     setIsClient(true);
   }, []);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
+
   if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -100,10 +110,16 @@ function AdminDashboardContent() {
       <div className="flex flex-col sm:gap-4 sm:py-4">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-          <Button>
-            <Upload className="mr-2 h-4 w-4" />
-            Update Datasets
-          </Button>
+          <div className='flex items-center gap-4'>
+            <Button>
+              <Upload className="mr-2 h-4 w-4" />
+              Update Datasets
+            </Button>
+            <ThemeToggle />
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" /> Logout
+            </Button>
+          </div>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
