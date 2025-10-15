@@ -8,34 +8,103 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Users, Target, Activity } from 'lucide-react';
+import { Users, Target, Activity, ArrowLeft } from 'lucide-react';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
+import { Button } from '@/components/ui/button';
 
-const teamData = [
-  { name: 'Alice', progress: 75, idpStatus: 'On Track' },
-  { name: 'Bob', progress: 40, idpStatus: 'Needs Attention' },
-  { name: 'Charlie', progress: 90, idpStatus: 'Exceeding' },
-  { name: 'David', progress: 60, idpStatus: 'On Track' },
-]
+type Skill = {
+  skill: string;
+  level: number;
+};
 
-const skillData = [
-  { skill: 'TypeScript', level: 70 },
-  { skill: 'React', level: 85 },
-  { skill: 'Node.js', level: 60 },
-  { skill: 'DevOps', level: 45 },
-  { skill: 'SQL', level: 75 },
+type TeamMember = {
+  name: string;
+  progress: number;
+  idpStatus: 'On Track' | 'Needs Attention' | 'Exceeding';
+  skills: Skill[];
+};
+
+const teamMembers: TeamMember[] = [
+  { 
+    name: 'Alice', 
+    progress: 75, 
+    idpStatus: 'On Track', 
+    skills: [
+      { skill: 'TypeScript', level: 85 },
+      { skill: 'React', level: 90 },
+      { skill: 'Node.js', level: 70 },
+      { skill: 'DevOps', level: 60 },
+      { skill: 'SQL', level: 80 },
+    ]
+  },
+  { 
+    name: 'Bob', 
+    progress: 40, 
+    idpStatus: 'Needs Attention',
+    skills: [
+      { skill: 'TypeScript', level: 60 },
+      { skill: 'React', level: 70 },
+      { skill: 'Node.js', level: 50 },
+      { skill: 'DevOps', level: 30 },
+      { skill: 'SQL', level: 65 },
+    ]
+  },
+  { 
+    name: 'Charlie', 
+    progress: 90, 
+    idpStatus: 'Exceeding',
+    skills: [
+      { skill: 'TypeScript', level: 95 },
+      { skill: 'React', level: 92 },
+      { skill: 'Node.js', level: 85 },
+      { skill: 'DevOps', level: 75 },
+      { skill: 'SQL', level: 90 },
+    ]
+  },
+  { 
+    name: 'David', 
+    progress: 60, 
+    idpStatus: 'On Track',
+    skills: [
+      { skill: 'TypeScript', level: 70 },
+      { skill: 'React', level: 80 },
+      { skill: 'Node.js', level: 65 },
+      { skill: 'DevOps', level: 40 },
+      { skill: 'SQL', level: 70 },
+    ]
+  },
 ];
 
+const teamAverageSkills: Skill[] = [
+  { skill: 'TypeScript', level: 78 },
+  { skill: 'React', level: 84 },
+  { skill: 'Node.js', level: 68 },
+  { skill: 'DevOps', level: 51 },
+  { skill: 'SQL', level: 76 },
+];
 
 function ManagerDashboardContent() {
   const { user, isUserLoading } = useUser();
   const [isClient, setIsClient] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
   useAuthGuard('/login');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handleMemberSelect = (member: TeamMember) => {
+    setSelectedMember(member);
+  };
+
+  const handleShowTeam = () => {
+    setSelectedMember(null);
+  };
+
+  const chartData = selectedMember ? selectedMember.skills : teamAverageSkills;
+  const chartTitle = selectedMember ? `${selectedMember.name}'s Skill Analytics` : 'Team Skill Analytics';
+  const chartDescription = selectedMember ? `A breakdown of ${selectedMember.name}'s current skills.` : 'Current average skill distribution in your team.';
 
   if (isUserLoading || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -55,7 +124,7 @@ function ManagerDashboardContent() {
                   <Users className="w-4 h-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{teamData.length}</div>
+                  <div className="text-2xl font-bold">{teamMembers.length}</div>
                   <p className="text-xs text-muted-foreground">Direct reports</p>
                 </CardContent>
               </Card>
@@ -96,8 +165,8 @@ function ManagerDashboardContent() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {teamData.map((member) => (
-                        <TableRow key={member.name}>
+                      {teamMembers.map((member) => (
+                        <TableRow key={member.name} onClick={() => handleMemberSelect(member)} className="cursor-pointer hover:bg-muted">
                           <TableCell>{member.name}</TableCell>
                           <TableCell>
                             <Progress value={member.progress} className="w-[100px]" />
@@ -113,17 +182,33 @@ function ManagerDashboardContent() {
               </Card>
               <Card className="col-span-1 lg:col-span-3">
                 <CardHeader>
-                  <CardTitle>Team Skill Analytics</CardTitle>
-                  <CardDescription>Current skill distribution in your team.</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>{chartTitle}</CardTitle>
+                      <CardDescription>{chartDescription}</CardDescription>
+                    </div>
+                    {selectedMember && (
+                      <Button variant="ghost" size="sm" onClick={handleShowTeam}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Team
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {isClient && (
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={skillData} layout="vertical">
+                      <BarChart data={chartData} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis dataKey="skill" type="category" width={80} />
-                        <Tooltip />
+                        <Tooltip
+                            contentStyle={{
+                                background: 'hsl(var(--background))',
+                                border: '1px solid hsl(var(--border))',
+                                color: 'hsl(var(--foreground))'
+                            }}
+                        />
                         <Bar dataKey="level" fill="hsl(var(--primary))" />
                       </BarChart>
                     </ResponsiveContainer>
