@@ -72,9 +72,6 @@ function EmployeeCoursesContent() {
        <Link href="/employee/courses" className="flex items-center gap-2 font-semibold text-primary" onClick={onClick}>
         <Book className="h-5 w-5" /> Courses
       </Link>
-      <Link href="/employee/dashboard#recommendations" className="flex items-center gap-2 text-muted-foreground hover:text-foreground" onClick={onClick}>
-        <Lightbulb className="h-5 w-5" /> Recommendations
-      </Link>
     </>
   );
 
