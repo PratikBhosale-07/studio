@@ -20,6 +20,9 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { CreateIdpDialog } from '@/components/idp/create-idp-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Course } from '@/types/course';
+import { AddCourseDialog } from '@/components/employee/add-course-dialog';
+
 
 const skillData = [
   { name: 'technical', value: 75 },
@@ -27,10 +30,9 @@ const skillData = [
 ];
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))'];
 
-const initialCourses = [
+const initialCourses: Course[] = [
   { id: 1, title: 'Advanced TypeScript for Enterprise', provider: 'Udemy' },
   { id: 2, title: 'Microservices with Node.js and React', provider: 'Coursera' },
-  { id: 3, title: 'The Complete Guide to Project Leadership', provider: 'LinkedIn Learning' },
 ];
 
 function EmployeeDashboardContent() {
@@ -39,8 +41,9 @@ function EmployeeDashboardContent() {
   const auth = getAuth();
   const [isClient, setIsClient] = useState(false);
   const [isIdpDialogOpen, setIsIdpDialogOpen] = useState(false);
+  const [isAddCourseDialogOpen, setIsAddCourseDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [courses, setCourses] = useState(initialCourses);
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
   const { toast } = useToast();
 
   const firestore = getFirestore();
@@ -67,10 +70,20 @@ function EmployeeDashboardContent() {
     setCourses(courses.filter(course => course.id !== id));
   };
 
-  const addCourse = () => {
-    const newId = courses.length > 0 ? Math.max(...courses.map(c => c.id)) + 1 : 1;
-    const newCourse = { id: newId, title: `New Sample Course ${newId}`, provider: 'Platform' };
-    setCourses([...courses, newCourse]);
+  const addCourse = (course: Course) => {
+    if (courses.some(c => c.id === course.id)) {
+        toast({
+            variant: 'destructive',
+            title: 'Course Already Added',
+            description: 'You are already enrolled in this course.',
+        });
+        return;
+    }
+    setCourses([...courses, course]);
+    toast({
+        title: 'Course Added',
+        description: `${course.title} has been added to your list.`,
+    });
   };
   
   const handleDeleteIdp = async (idpId: string) => {
@@ -122,6 +135,7 @@ function EmployeeDashboardContent() {
   return (
     <>
     <CreateIdpDialog open={isIdpDialogOpen} onOpenChange={setIsIdpDialogOpen} />
+    <AddCourseDialog open={isAddCourseDialogOpen} onOpenChange={setIsAddCourseDialogOpen} onAddCourse={addCourse} />
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
         <div className="flex items-center gap-4">
@@ -291,7 +305,7 @@ function EmployeeDashboardContent() {
                     <CardTitle>My Courses</CardTitle>
                     <CardDescription>Courses you are enrolled in or have completed.</CardDescription>
                 </div>
-                <Button onClick={addCourse} className='w-full sm:w-auto'><PlusCircle className='mr-2 h-4 w-4'/>Add Course</Button>
+                <Button onClick={() => setIsAddCourseDialogOpen(true)} className='w-full sm:w-auto'><PlusCircle className='mr-2 h-4 w-4'/>Add Course</Button>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
@@ -328,3 +342,5 @@ export default function EmployeeDashboard() {
         </FirebaseClientProvider>
     )
 }
+
+    
