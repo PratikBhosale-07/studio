@@ -131,6 +131,25 @@ function LoginPageContent() {
                 {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
             </form>
+             <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground space-y-2">
+                    <p className='font-semibold text-foreground'>Demo Credentials:</p>
+                    <p><strong>Employee:</strong> employee123@gmail.com</p>
+                    <p><strong>Manager:</strong> manager123@gmail.com</p>
+                    <p><strong>Admin:</strong> admin123@gmail.com</p>
+                    <p><strong>Password:</strong> 1234567</p>
+                </div>
+            </div>
             <div className="mt-6 text-center text-sm">
                 Don&apos;t have an account?{' '}
                 <Link href="/signup" className="underline font-semibold">
