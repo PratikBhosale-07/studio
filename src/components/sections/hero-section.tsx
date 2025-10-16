@@ -23,7 +23,7 @@ export default function HeroSection() {
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="bg-background/20 text-foreground backdrop-blur-sm hover:bg-background/30 hover:text-foreground w-full sm:w-auto transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg" asChild>
+            <Button size="lg" variant="outline" className="bg-background/20 text-foreground backdrop-blur-sm hover:bg-background/30 hover:text-foreground w-full sm:w-auto transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-lg-white" asChild>
               <a href="https://youtu.be/ihibPkSTnNU" target="_blank" rel="noopener noreferrer">
                 <PlayCircle className="mr-2 h-5 w-5" />
                 Watch Demo
