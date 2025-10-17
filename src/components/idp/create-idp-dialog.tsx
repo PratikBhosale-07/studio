@@ -22,7 +22,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Plus, X, Loader2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { addDocumentNonBlocking, useAuth, useFirestore, useUser } from '@/firebase';
+import { addDocumentNonBlocking, useUser, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { collection } from 'firebase/firestore';
 import { extractResumeDetails } from '@/ai/flows/extract-resume-details';
