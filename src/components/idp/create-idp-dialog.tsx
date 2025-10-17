@@ -26,6 +26,7 @@ import { addDocumentNonBlocking, useUser, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { collection } from 'firebase/firestore';
 import { extractResumeDetails } from '@/ai/flows/extract-resume-details';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const idpSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long.'),
@@ -167,7 +168,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus /> Create New IDP
@@ -176,137 +177,139 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
             Fill out the form below, or upload a resume to get started.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="resume">Upload Resume (PDF) to Auto-fill</Label>
-            <div className="relative">
-              <Input
-                id="resume"
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                disabled={isExtracting}
-                className="pr-12"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                {isExtracting ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                ) : (
-                  <Upload className="h-5 w-5 text-muted-foreground" />
-                )}
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <form id="idp-form" onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="resume">Upload Resume (PDF) to Auto-fill</Label>
+              <div className="relative">
+                <Input
+                  id="resume"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  disabled={isExtracting}
+                  className="pr-12"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  {isExtracting ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  ) : (
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="title">IDP Title *</Label>
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => <Input id="title" placeholder="e.g., Career Growth - Senior Engineer" {...field} />}
-            />
-            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description *</Label>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <Textarea id="description" placeholder="Describe your development plan..." {...field} />
-              )}
-            />
-            {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="careerGoal">Career Goal *</Label>
+              <Label htmlFor="title">IDP Title *</Label>
               <Controller
-                name="careerGoal"
+                name="title"
                 control={control}
-                render={({ field }) => <Input id="careerGoal" placeholder="e.g., Advance to Senior Role" {...field} />}
+                render={({ field }) => <Input id="title" placeholder="e.g., Career Growth - Senior Engineer" {...field} />}
               />
-              {errors.careerGoal && <p className="text-sm text-destructive">{errors.careerGoal.message}</p>}
+              {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="targetRole">Target Role *</Label>
+              <Label htmlFor="description">Description *</Label>
               <Controller
-                name="targetRole"
+                name="description"
                 control={control}
-                render={({ field }) => <Input id="targetRole" placeholder="e.g., Senior Software Engineer" {...field} />}
+                render={({ field }) => (
+                  <Textarea id="description" placeholder="Describe your development plan..." {...field} />
+                )}
               />
-              {errors.targetRole && <p className="text-sm text-destructive">{errors.targetRole.message}</p>}
+              {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="grid gap-2">
-                <Label htmlFor="currentSkills">Current Skills *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="careerGoal">Career Goal *</Label>
                 <Controller
-                    name="currentSkills"
-                    control={control}
-                    render={({ field }) => <Input id="currentSkills" placeholder="e.g., React, Node.js, SQL" {...field} />}
+                  name="careerGoal"
+                  control={control}
+                  render={({ field }) => <Input id="careerGoal" placeholder="e.g., Advance to Senior Role" {...field} />}
                 />
-                {errors.currentSkills && <p className="text-sm text-destructive">{errors.currentSkills.message}</p>}
-             </div>
-             <div className="grid gap-2">
-                <Label htmlFor="skillsToDevelop">Skills to Develop *</Label>
+                {errors.careerGoal && <p className="text-sm text-destructive">{errors.careerGoal.message}</p>}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="targetRole">Target Role *</Label>
                 <Controller
-                    name="skillsToDevelop"
-                    control={control}
-                    render={({ field }) => <Input id="skillsToDevelop" placeholder="e.g., DevOps, Python, Leadership" {...field} />}
+                  name="targetRole"
+                  control={control}
+                  render={({ field }) => <Input id="targetRole" placeholder="e.g., Senior Software Engineer" {...field} />}
                 />
-                {errors.skillsToDevelop && <p className="text-sm text-destructive">{errors.skillsToDevelop.message}</p>}
-             </div>
-          </div>
-           <div className="grid gap-2">
-            <Label htmlFor="experienceSummary">Experience Summary *</Label>
-            <Controller
-              name="experienceSummary"
-              control={control}
-              render={({ field }) => (
-                <Textarea id="experienceSummary" placeholder="Summarize your relevant experience..." {...field} />
-              )}
-            />
-            {errors.experienceSummary && <p className="text-sm text-destructive">{errors.experienceSummary.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="endDate">Target Completion Date *</Label>
-            <Controller
-              name="endDate"
-              control={control}
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-            {errors.endDate && <p className="text-sm text-destructive">{errors.endDate.message}</p>}
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isSubmitting || isExtracting}>
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button type="submit" disabled={isSubmitting || isExtracting}>
-              {isSubmitting ? 'Creating...' : 'Create IDP'}
+                {errors.targetRole && <p className="text-sm text-destructive">{errors.targetRole.message}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                  <Label htmlFor="currentSkills">Current Skills *</Label>
+                  <Controller
+                      name="currentSkills"
+                      control={control}
+                      render={({ field }) => <Input id="currentSkills" placeholder="e.g., React, Node.js, SQL" {...field} />}
+                  />
+                  {errors.currentSkills && <p className="text-sm text-destructive">{errors.currentSkills.message}</p>}
+              </div>
+              <div className="grid gap-2">
+                  <Label htmlFor="skillsToDevelop">Skills to Develop *</Label>
+                  <Controller
+                      name="skillsToDevelop"
+                      control={control}
+                      render={({ field }) => <Input id="skillsToDevelop" placeholder="e.g., DevOps, Python, Leadership" {...field} />}
+                  />
+                  {errors.skillsToDevelop && <p className="text-sm text-destructive">{errors.skillsToDevelop.message}</p>}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="experienceSummary">Experience Summary *</Label>
+              <Controller
+                name="experienceSummary"
+                control={control}
+                render={({ field }) => (
+                  <Textarea id="experienceSummary" placeholder="Summarize your relevant experience..." {...field} />
+                )}
+              />
+              {errors.experienceSummary && <p className="text-sm text-destructive">{errors.experienceSummary.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="endDate">Target Completion Date *</Label>
+              <Controller
+                name="endDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.endDate && <p className="text-sm text-destructive">{errors.endDate.message}</p>}
+            </div>
+          </form>
+        </ScrollArea>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button type="button" variant="outline" disabled={isSubmitting || isExtracting}>
+              Cancel
             </Button>
-          </DialogFooter>
-        </form>
+          </DialogClose>
+          <Button type="submit" form="idp-form" disabled={isSubmitting || isExtracting}>
+            {isSubmitting ? 'Creating...' : 'Create IDP'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
