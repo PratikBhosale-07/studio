@@ -13,6 +13,7 @@
  * - /individual_development_plans/{idpId}: Individual development plans (IDPs).
  *
  * Key Security Decisions:
+ * - Demo accounts have full access to all data for testing purposes.
  * - Employees can only read/write their own IDPs.
  * - Listing of all IDPs is allowed.
  * - Only authenticated users can access any data. Anonymous access is not permitted.
@@ -28,6 +29,20 @@ service cloud.firestore {
      */
     function isSignedIn() {
       return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user is a demo account.
+     * Demo accounts have full access for testing purposes.
+     * @returns {boolean} True if the user is a demo account, false otherwise.
+     */
+    function isDemoAccount() {
+      return isSignedIn() && (
+        request.auth.token.email.matches('.*demo.*@.*') ||
+        request.auth.token.email.matches('employee123@.*') ||
+        request.auth.token.email.matches('manager123@.*') ||
+        request.auth.token.email.matches('admin123@.*')
+      );
     }
 
     /**
@@ -51,11 +66,13 @@ service cloud.firestore {
     /**
      * @description Rules for the /employees collection.
      * @path /employees/{employeeId}
+     * @allow (all) Demo accounts have full access.
      * @allow (create) User with UID 'employee123' can create a new employee document with employeeId = 'employee123'.
      * @deny (create) User with UID 'anotherUser' cannot create an employee document with employeeId = 'employee123'.
      * @principle Enforces document ownership for writes.
      */
     match /employees/{employeeId} {
+      allow read, write: if isDemoAccount();
       allow get: if isOwner(employeeId);
       allow list: if false;
       allow create: if isOwner(employeeId) && request.resource.data.id == employeeId;
@@ -66,11 +83,13 @@ service cloud.firestore {
     /**
      * @description Rules for the /managers collection.
      * @path /managers/{managerId}
+     * @allow (all) Demo accounts have full access.
      * @allow (create) User with UID 'manager456' can create a new manager document with managerId = 'manager456'.
      * @deny (create) User with UID 'anotherUser' cannot create a manager document with managerId = 'manager456'.
      * @principle Enforces document ownership for writes.
      */
     match /managers/{managerId} {
+      allow read, write: if isDemoAccount();
       allow get: if isOwner(managerId);
       allow list: if false;
       allow create: if isOwner(managerId) && request.resource.data.id == managerId;
@@ -81,11 +100,13 @@ service cloud.firestore {
     /**
      * @description Rules for the /admins collection.
      * @path /admins/{adminId}
+     * @allow (all) Demo accounts have full access.
      * @allow (create) User with UID 'admin789' can create a new admin document with adminId = 'admin789'.
      * @deny (create) User with UID 'anotherUser' cannot create an admin document with adminId = 'admin789'.
      * @principle Enforces document ownership for writes.
      */
     match /admins/{adminId} {
+      allow read, write: if isDemoAccount();
       allow get: if isOwner(adminId);
       allow list: if false;
       allow create: if isOwner(adminId) && request.resource.data.id == adminId;
@@ -96,6 +117,7 @@ service cloud.firestore {
     /**
      * @description Rules for the /individual_development_plans collection.
      * @path /individual_development_plans/{idpId}
+     * @allow (all) Demo accounts have full access.
      * @allow (get) Any signed-in user can read an individual development plan.
      * @allow (list) Any signed-in user can list all individual development plans.
      * @allow (create) User with UID 'user123' can create a new IDP document.
@@ -104,6 +126,7 @@ service cloud.firestore {
      * @principle Allows public read access but restricts write access to the owner.
      */
     match /individual_development_plans/{idpId} {
+        allow read, write: if isDemoAccount();
         allow get: if isSignedIn();
         allow list: if isSignedIn();
         allow create: if isSignedIn() && request.resource.data.employeeId == request.auth.uid;
