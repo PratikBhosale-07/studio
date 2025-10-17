@@ -6,6 +6,9 @@ export interface IndividualDevelopmentPlan {
     description: string;
     careerGoal: string;
     targetRole: string;
+    currentSkills: string;
+    skillsToDevelop: string;
+    experienceSummary: string;
     goals: string[];
     startDate: string;
     endDate: string;

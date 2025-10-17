@@ -32,6 +32,9 @@ const idpSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters long.'),
   careerGoal: z.string().min(3, 'Career Goal must be at least 3 characters long.'),
   targetRole: z.string().min(3, 'Target Role must be at least 3 characters long.'),
+  currentSkills: z.string().min(3, 'Please list at least one skill.'),
+  skillsToDevelop: z.string().min(3, 'Please list at least one skill to develop.'),
+  experienceSummary: z.string().min(10, 'Experience summary must be at least 10 characters long.'),
   endDate: z.date({
     required_error: 'A target completion date is required.',
   }),
@@ -64,6 +67,9 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
       description: '',
       careerGoal: '',
       targetRole: '',
+      currentSkills: '',
+      skillsToDevelop: '',
+      experienceSummary: '',
       endDate: undefined,
     },
   });
@@ -80,6 +86,9 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
             const extractedDetails = await extractResumeDetails({ resumeDataUri });
             setValue('careerGoal', extractedDetails.careerGoal);
             setValue('description', extractedDetails.summary);
+            setValue('currentSkills', extractedDetails.currentSkills);
+            setValue('skillsToDevelop', extractedDetails.skillsToDevelop);
+            setValue('experienceSummary', extractedDetails.experienceSummary);
             toast({
               title: 'Resume Analyzed',
               description: 'We have pre-filled some fields based on your resume.',
@@ -132,7 +141,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
       await addDocumentNonBlocking(idpCollection, {
         ...idpData,
         employeeId: user.uid,
-        goals: [data.careerGoal],
+        goals: data.skillsToDevelop.split(',').map(s => s.trim()),
         startDate: new Date().toISOString(),
         endDate: data.endDate.toISOString(),
         status: 'Not Started',
@@ -228,6 +237,37 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
               />
               {errors.targetRole && <p className="text-sm text-destructive">{errors.targetRole.message}</p>}
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="grid gap-2">
+                <Label htmlFor="currentSkills">Current Skills *</Label>
+                <Controller
+                    name="currentSkills"
+                    control={control}
+                    render={({ field }) => <Input id="currentSkills" placeholder="e.g., React, Node.js, SQL" {...field} />}
+                />
+                {errors.currentSkills && <p className="text-sm text-destructive">{errors.currentSkills.message}</p>}
+             </div>
+             <div className="grid gap-2">
+                <Label htmlFor="skillsToDevelop">Skills to Develop *</Label>
+                <Controller
+                    name="skillsToDevelop"
+                    control={control}
+                    render={({ field }) => <Input id="skillsToDevelop" placeholder="e.g., DevOps, Python, Leadership" {...field} />}
+                />
+                {errors.skillsToDevelop && <p className="text-sm text-destructive">{errors.skillsToDevelop.message}</p>}
+             </div>
+          </div>
+           <div className="grid gap-2">
+            <Label htmlFor="experienceSummary">Experience Summary *</Label>
+            <Controller
+              name="experienceSummary"
+              control={control}
+              render={({ field }) => (
+                <Textarea id="experienceSummary" placeholder="Summarize your relevant experience..." {...field} />
+              )}
+            />
+            {errors.experienceSummary && <p className="text-sm text-destructive">{errors.experienceSummary.message}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="endDate">Target Completion Date *</Label>
