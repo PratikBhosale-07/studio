@@ -19,12 +19,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Plus, X } from 'lucide-react';
+import { CalendarIcon, Plus, X, Loader2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { addDocumentNonBlocking, useAuth, useFirestore, useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { collection } from 'firebase/firestore';
+import { extractResumeDetails } from '@/ai/flows/extract-resume-details';
 
 const idpSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters long.'),
@@ -34,6 +35,7 @@ const idpSchema = z.object({
   endDate: z.date({
     required_error: 'A target completion date is required.',
   }),
+  resume: z.any().optional(),
 });
 
 type IdpFormValues = z.infer<typeof idpSchema>;
@@ -47,11 +49,13 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
   const { toast } = useToast();
   const { user } = useUser();
   const firestore = useFirestore();
+  const [isExtracting, setIsExtracting] = useState(false);
 
   const {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<IdpFormValues>({
     resolver: zodResolver(idpSchema),
@@ -63,6 +67,52 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
       endDate: undefined,
     },
   });
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setIsExtracting(true);
+      try {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const resumeDataUri = reader.result as string;
+          try {
+            const extractedDetails = await extractResumeDetails({ resumeDataUri });
+            setValue('careerGoal', extractedDetails.careerGoal);
+            setValue('description', extractedDetails.summary);
+            toast({
+              title: 'Resume Analyzed',
+              description: 'We have pre-filled some fields based on your resume.',
+            });
+          } catch (aiError) {
+            console.error('AI extraction error:', aiError);
+            toast({
+              variant: 'destructive',
+              title: 'AI Error',
+              description: 'Could not extract details from the resume.',
+            });
+          } finally {
+            setIsExtracting(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('File reading error:', error);
+        toast({
+          variant: 'destructive',
+          title: 'File Error',
+          description: 'Could not read the selected file.',
+        });
+        setIsExtracting(false);
+      }
+    } else if (file) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid File Type',
+        description: 'Please upload a PDF file.',
+      });
+    }
+  };
 
   const onSubmit = async (data: IdpFormValues) => {
     if (!user || !firestore) {
@@ -76,8 +126,11 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
 
     try {
       const idpCollection = collection(firestore, 'individual_development_plans');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { resume, ...idpData } = data;
+
       await addDocumentNonBlocking(idpCollection, {
-        ...data,
+        ...idpData,
         employeeId: user.uid,
         goals: [data.careerGoal],
         startDate: new Date().toISOString(),
@@ -110,11 +163,32 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
           <DialogTitle className="flex items-center gap-2">
             <Plus /> Create New IDP
           </DialogTitle>
-          <DialogDescription className="sr-only">
-              Fill out the form to create a new Individual Development Plan.
+          <DialogDescription>
+            Fill out the form below, or upload a resume to get started.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="resume">Upload Resume (PDF) to Auto-fill</Label>
+            <div className="relative">
+              <Input
+                id="resume"
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                disabled={isExtracting}
+                className="pr-12"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                {isExtracting ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="title">IDP Title *</Label>
             <Controller
@@ -125,7 +199,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Controller
               name="description"
               control={control}
@@ -137,7 +211,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="careerGoal">Career Goal</Label>
+              <Label htmlFor="careerGoal">Career Goal *</Label>
               <Controller
                 name="careerGoal"
                 control={control}
@@ -146,7 +220,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
               {errors.careerGoal && <p className="text-sm text-destructive">{errors.careerGoal.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="targetRole">Target Role</Label>
+              <Label htmlFor="targetRole">Target Role *</Label>
               <Controller
                 name="targetRole"
                 control={control}
@@ -156,7 +230,7 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="endDate">Target Completion Date</Label>
+            <Label htmlFor="endDate">Target Completion Date *</Label>
             <Controller
               name="endDate"
               control={control}
@@ -184,11 +258,11 @@ export function CreateIdpDialog({ open, onOpenChange }: CreateIdpDialogProps) {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" disabled={isSubmitting || isExtracting}>
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || isExtracting}>
               {isSubmitting ? 'Creating...' : 'Create IDP'}
             </Button>
           </DialogFooter>
