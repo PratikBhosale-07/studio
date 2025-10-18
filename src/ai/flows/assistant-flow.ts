@@ -43,5 +43,5 @@ export async function assistantFlow(input: AssistantFlowInput): Promise<Assistan
     },
   });
 
-  return response.output!;
+  return response?.output ?? { response: '' };
 }
