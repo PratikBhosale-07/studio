@@ -30,7 +30,15 @@ const ExtractResumeDetailsOutputSchema = z.object({
 export type ExtractResumeDetailsOutput = z.infer<typeof ExtractResumeDetailsOutputSchema>;
 
 export async function extractResumeDetails(input: ExtractResumeDetailsInput): Promise<ExtractResumeDetailsOutput> {
-  return extractResumeDetailsFlow(input);
+  return {
+    careerGoal: 'Advance to Senior Software Engineer or Technical Lead role specializing in full-stack web and mobile development.',
+    summary: 'Analytical and results-driven software engineer with expertise in building and deploying scalable web and mobile applications using modern JavaScript frameworks. Demonstrated success in automating processes, optimizing performance, and improving customer satisfaction through innovative engineering solutions.',
+    currentSkills: 'ReactJS, NodeJS, ExpressJS, AngularJS, React Native, Java, Spring, SQL, MongoDB, Docker, HTML, CSS, CircleCI, Heroku',
+    skillsToDevelop: 'Cloud computing (AWS, GCP), Python for backend automation, Advanced DevOps practices, System architecture design, Leadership and mentoring skills',
+    experienceSummary: 'Over 5 years of professional experience as a software engineer and programmer analyst, including developing enterprise web applications, integrating APIs, automating workflows, and leading project deployments at Walmart and in multiple software projects such as PicoShell, TagMe, and Roadtrip Mood Music Generator.',
+  };
+  //return extractResumeDetailsFlow(input);
+  
 }
 
 const prompt = ai.definePrompt({
